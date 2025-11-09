@@ -300,65 +300,76 @@ export default function StakingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen dark:bg-gradient-to-br dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 bg-white relative overflow-hidden p-4 md:p-8">
+      {/* Dark mode grid background */}
+      <div className="dark:block hidden absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.3)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-purple-500/10 to-transparent"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Lock className="h-10 w-10 text-purple-400" />
+          <h1 className="text-4xl font-bold dark:text-white text-black mb-2 flex items-center gap-3">
+            <Lock className="h-10 w-10 dark:text-purple-400 text-purple-600" />
             Staking
           </h1>
-          <p className="text-gray-400">
+          <p className="dark:text-gray-400 text-gray-600">
             Lock your OWT tokens and earn passive rewards
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-purple-500/30 bg-slate-900/50">
+          <Card className="dark:border-purple-500/30 dark:bg-slate-900/50 border-gray-200 bg-gray-50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium dark:text-gray-400 text-gray-600 flex items-center gap-2">
                 <Coins className="h-4 w-4" />
                 OWT Balance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
+              <div className="text-3xl font-bold dark:text-white text-black">
                 {owtBalance.toFixed(2)}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">
                 Available for staking
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-purple-500/30 bg-slate-900/50">
+          <Card className="dark:border-purple-500/30 dark:bg-slate-900/50 border-gray-200 bg-gray-50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium dark:text-gray-400 text-gray-600 flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Total Staked
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-400">
+              <div className="text-3xl font-bold dark:text-purple-400 text-purple-600">
                 {totalStaked.toFixed(2)}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Across all pools</p>
+              <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">
+                Across all pools
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="border-purple-500/30 bg-slate-900/50">
+          <Card className="dark:border-purple-500/30 dark:bg-slate-900/50 border-gray-200 bg-gray-50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium dark:text-gray-400 text-gray-600 flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 Rewards Earned
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-400">
+              <div className="text-3xl font-bold dark:text-green-400 text-green-600">
                 {totalRewards.toFixed(2)}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Total rewards</p>
+              <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">
+                Total rewards
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -367,14 +378,14 @@ export default function StakingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Staking Pools */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-bold dark:text-white text-black mb-6">
               Staking Pools
             </h2>
             <div className="space-y-4">
               {stakingPools.map((pool) => (
                 <Card
                   key={pool.id}
-                  className="border-purple-500/30 bg-slate-900/50 hover:border-purple-500/60 transition-all cursor-pointer"
+                  className="dark:border-purple-500/30 dark:bg-slate-900/50 dark:hover:border-purple-500/60 border-gray-200 bg-white hover:border-purple-300 transition-all cursor-pointer"
                   onClick={() => {
                     setSelectedPool(pool);
                     setShowStakeModal(true);
@@ -383,7 +394,7 @@ export default function StakingPage() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-xl text-white flex items-center gap-2">
+                        <CardTitle className="text-xl dark:text-white text-black flex items-center gap-2">
                           {pool.name}
                           <span
                             className={`text-sm px-2 py-1 rounded-full ${getRiskColor(
@@ -393,32 +404,40 @@ export default function StakingPage() {
                             {pool.riskLevel}
                           </span>
                         </CardTitle>
-                        <CardDescription>{pool.description}</CardDescription>
+                        <CardDescription className="dark:text-gray-400 text-gray-600">
+                          {pool.description}
+                        </CardDescription>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-bold text-green-400">
+                        <div className="text-3xl font-bold dark:text-green-400 text-green-600">
                           {pool.apy}%
                         </div>
-                        <p className="text-xs text-gray-500">APY</p>
+                        <p className="text-xs dark:text-gray-500 text-gray-500">
+                          APY
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Min Stake</p>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-xs dark:text-gray-500 text-gray-500 mb-1">
+                          Min Stake
+                        </p>
+                        <p className="text-sm font-semibold dark:text-white text-black">
                           {pool.minStake} OWT
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Max Stake</p>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-xs dark:text-gray-500 text-gray-500 mb-1">
+                          Max Stake
+                        </p>
+                        <p className="text-sm font-semibold dark:text-white text-black">
                           {pool.maxStake} OWT
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">
+                        <p className="text-xs dark:text-gray-500 text-gray-500 mb-1">
                           Lock Period
                         </p>
                         <p className="text-sm font-semibold text-white">
@@ -448,14 +467,18 @@ export default function StakingPage() {
 
           {/* Your Stakes */}
           <div>
-            <h2 className="text-2xl font-bold text-white mb-6">Your Stakes</h2>
-            <Card className="border-purple-500/30 bg-slate-900/50">
+            <h2 className="text-2xl font-bold dark:text-white text-black mb-6">
+              Your Stakes
+            </h2>
+            <Card className="dark:border-purple-500/30 dark:bg-slate-900/50 border-gray-200 bg-white">
               <CardContent className="pt-6">
                 {userStakes.length === 0 ? (
                   <div className="text-center py-8">
-                    <Zap className="mx-auto h-12 w-12 text-gray-600 mb-3" />
-                    <p className="text-gray-400 mb-4">No active stakes yet</p>
-                    <p className="text-sm text-gray-500">
+                    <Zap className="mx-auto h-12 w-12 dark:text-gray-600 text-gray-300 mb-3" />
+                    <p className="dark:text-gray-400 text-gray-600 mb-4">
+                      No active stakes yet
+                    </p>
+                    <p className="text-sm dark:text-gray-500 text-gray-500">
                       Start staking to earn rewards
                     </p>
                   </div>
@@ -470,14 +493,14 @@ export default function StakingPage() {
                       return (
                         <div
                           key={index}
-                          className="p-4 bg-slate-800/50 rounded-lg border border-purple-500/20"
+                          className="p-4 dark:bg-slate-800/50 bg-gray-100 rounded-lg dark:border-purple-500/20 border border-gray-300"
                         >
                           <div className="flex justify-between items-start mb-3">
                             <div>
-                              <p className="text-sm font-semibold text-white">
+                              <p className="text-sm font-semibold dark:text-white text-black">
                                 {pool?.name}
                               </p>
-                              <p className="text-lg font-bold text-purple-400">
+                              <p className="text-lg font-bold dark:text-purple-400 text-purple-600">
                                 {stake.amount.toFixed(2)} OWT
                               </p>
                             </div>
@@ -488,10 +511,10 @@ export default function StakingPage() {
                             )}
                           </div>
 
-                          <div className="space-y-2 mb-3 text-xs text-gray-400">
+                          <div className="space-y-2 mb-3 text-xs dark:text-gray-400 text-gray-600">
                             <div className="flex justify-between">
                               <span>Rewards</span>
-                              <span className="text-green-400 font-semibold">
+                              <span className="dark:text-green-400 text-green-600 font-semibold">
                                 +{stake.rewards.toFixed(2)} OWT
                               </span>
                             </div>
@@ -502,7 +525,7 @@ export default function StakingPage() {
                           </div>
 
                           <Button
-                            className="w-full bg-slate-700 hover:bg-slate-600 text-white text-sm"
+                            className="w-full dark:bg-slate-700 dark:hover:bg-slate-600 bg-gray-300 hover:bg-gray-400 dark:text-white text-black text-sm"
                             disabled={!isUnlocked}
                             onClick={() => handleUnstake(stake)}
                           >
@@ -530,22 +553,28 @@ export default function StakingPage() {
 
         {/* Stake Modal */}
         {showStakeModal && selectedPool && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <Card className="max-w-md w-full border-purple-500/30">
+          <div className="fixed inset-0 dark:bg-black/50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <Card className="max-w-md w-full dark:border-purple-500/30 border-gray-200 dark:bg-slate-900 bg-white">
               <CardHeader>
-                <CardTitle className="text-2xl">{selectedPool.name}</CardTitle>
-                <CardDescription>{selectedPool.description}</CardDescription>
+                <CardTitle className="text-2xl dark:text-white text-black">
+                  {selectedPool.name}
+                </CardTitle>
+                <CardDescription className="dark:text-gray-400 text-gray-600">
+                  {selectedPool.description}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-slate-900/50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400 mb-1">APY</div>
-                  <div className="text-3xl font-bold text-green-400">
+                <div className="dark:bg-slate-900/50 bg-gray-100 p-4 rounded-lg">
+                  <div className="text-sm dark:text-gray-400 text-gray-600 mb-1">
+                    APY
+                  </div>
+                  <div className="text-3xl font-bold dark:text-green-400 text-green-600">
                     {selectedPool.apy}%
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">
+                  <label className="block text-sm font-medium dark:text-white text-black mb-2">
                     Amount (OWT)
                   </label>
                   <input
@@ -553,18 +582,20 @@ export default function StakingPage() {
                     value={stakeAmount}
                     onChange={(e) => setStakeAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full px-4 py-2 bg-slate-900/50 border border-purple-500/30 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 dark:bg-slate-900/50 bg-gray-100 dark:border-purple-500/30 border-gray-300 border rounded-lg dark:text-white text-black dark:placeholder-gray-600 placeholder-gray-400 focus:outline-none dark:focus:border-purple-500 focus:border-purple-400"
                   />
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs dark:text-gray-500 text-gray-600 mt-1">
                     Balance: {owtBalance.toFixed(2)} OWT
                   </div>
                 </div>
 
                 {stakeAmount && (
-                  <div className="bg-slate-900/50 p-4 rounded-lg space-y-2">
+                  <div className="dark:bg-slate-900/50 bg-gray-100 p-4 rounded-lg space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Lock Period:</span>
-                      <span className="text-white font-semibold">
+                      <span className="dark:text-gray-400 text-gray-600">
+                        Lock Period:
+                      </span>
+                      <span className="dark:text-white text-black font-semibold">
                         {selectedPool.lockPeriodDays === 0
                           ? "Flexible"
                           : `${selectedPool.lockPeriodDays} days`}
@@ -583,7 +614,7 @@ export default function StakingPage() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Total After Lock:</span>
-                      <span className="text-white font-semibold">
+                      <span className="dark:text-white font-semibold">
                         {(
                           parseFloat(stakeAmount) +
                           calculateRewards(

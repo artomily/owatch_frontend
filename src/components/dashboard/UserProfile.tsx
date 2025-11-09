@@ -7,31 +7,134 @@ import {
   Edit,
   Save,
   X,
+  Loader2,
+  Wallet,
+  Trophy,
+  User2Icon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
 import { useTheme } from "../../context/ThemeContext";
+import {
+  getProfile,
+  getProfileByWallet,
+  updateProfile,
+  getTotalPoints,
+  getVideoCompletionStats,
+} from "@/lib/queries";
+import { ensureProfileExists } from "@/lib/profileUtils";
 
 export function UserProfile() {
   const { theme } = useTheme();
+  const { address, isConnected } = useAccount();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profileId, setProfileId] = useState<string | null>(null);
   const [profile, setProfile] = useState({
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    bio: "Full-stack developer passionate about creating amazing user experiences. Love working with React, TypeScript, and modern web technologies.",
-    joinDate: "2023-06-15",
+    id: "",
+    username: "",
+    total_points: 0,
+    avatar_url: "" as string | undefined,
+    created_at: "",
+  });
+  const [stats, setStats] = useState({
+    videosCompleted: 0,
+    totalVideos: 0,
+    totalPoints: 0,
   });
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // Here you would typically save to an API
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!address) return;
+
+      setLoading(true);
+      try {
+        // Get or create profile
+        let id = await getProfileByWallet(address);
+        if (!id) {
+          id = await ensureProfileExists(address);
+        }
+
+        if (id) {
+          setProfileId(id);
+
+          // Get profile details
+          const profileData = await getProfile(id);
+          if (profileData) {
+            setProfile({
+              id: profileData.id,
+              username: profileData.username,
+              total_points: profileData.total_points,
+              avatar_url: profileData.avatar_url,
+              created_at: profileData.created_at,
+            });
+          }
+
+          // Get stats
+          const points = await getTotalPoints(id);
+          const completionStats = await getVideoCompletionStats(id);
+
+          setStats({
+            videosCompleted: completionStats?.completed || 0,
+            totalVideos: completionStats?.total || 0,
+            totalPoints: points || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isConnected && address) {
+      fetchProfile();
+    }
+  }, [address, isConnected]);
+
+  const handleSave = async () => {
+    if (!profileId) return;
+
+    try {
+      await updateProfile(profileId, {
+        username: profile.username,
+        avatar_url: profile.avatar_url,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset to original values if needed
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-lg shadow-lg">
+          <Wallet className="w-16 h-16 mx-auto mb-4 text-purple-600" />
+          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+            Connect Your Wallet
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300">
+            Please connect your wallet to view your profile
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -80,25 +183,36 @@ export function UserProfile() {
           <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
             <div className="text-center">
               <div className="relative inline-block mb-4">
-                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {profile.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                <div className="w-24 h-24 dark:bg-gradient-to-br bg-gray-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  {profile.username ? (
+                    profile.username.substring(0, 2).toUpperCase()
+                  ) : (
+                    <User2Icon className="w-10 h-10" />
+                  )}
                 </div>
                 <button className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
                   <Camera className="w-4 h-4" />
                 </button>
               </div>
               <h2 className="text-xl font-semibold dark:text-white text-gray-900 mb-1">
-                {profile.name}
+                {profile.username || "Owatchers"}
               </h2>
-              <p className="dark:text-gray-300 text-gray-600 mb-4">
-                {profile.email}
+              <p className="dark:text-gray-300 text-gray-600 mb-2 text-sm font-mono">
+                {address
+                  ? `${address.substring(0, 6)}...${address.substring(
+                      address.length - 4
+                    )}`
+                  : ""}
               </p>
-              <div className="flex items-center justify-center text-sm dark:text-gray-400 text-gray-500 mb-4">
+              <div className="flex items-center justify-center gap-1 mb-4">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">
+                  {profile.total_points.toLocaleString()} pts
+                </span>
+              </div>
+              <div className="flex items-center justify-center text-sm dark:text-gray-400 text-gray-500">
                 <Calendar className="w-4 h-4 mr-1" />
-                Joined {new Date(profile.joinDate).toLocaleDateString()}
+                Joined {new Date(profile.created_at).toLocaleDateString()}
               </div>
             </div>
           </div>
@@ -111,26 +225,18 @@ export function UserProfile() {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="dark:text-gray-300 text-gray-600">
-                  Videos Uploaded
+                  Videos Completed
                 </span>
                 <span className="font-semibold dark:text-white text-gray-900">
-                  24
+                  {stats.videosCompleted}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="dark:text-gray-300 text-gray-600">
-                  Total Views
+                  Total Points
                 </span>
                 <span className="font-semibold dark:text-white text-gray-900">
-                  2.4M
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="dark:text-gray-300 text-gray-600">
-                  Subscribers
-                </span>
-                <span className="font-semibold dark:text-white text-gray-900">
-                  1.2K
+                  {stats.totalPoints.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -147,110 +253,63 @@ export function UserProfile() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-                  Full Name
+                  Username
                 </label>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={profile.name}
+                    value={profile.username}
                     onChange={(e) =>
-                      setProfile({ ...profile, name: e.target.value })
+                      setProfile({ ...profile, username: e.target.value })
                     }
                     className="w-full px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
                   />
                 ) : (
                   <p className="dark:text-white text-gray-900">
-                    {profile.name}
+                    {profile.username || "Not set"}
                   </p>
                 )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-                  Email Address
+                  Wallet Address
                 </label>
                 <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 dark:text-gray-400 text-gray-400" />
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={profile.email}
-                      onChange={(e) =>
-                        setProfile({ ...profile, email: e.target.value })
-                      }
-                      className="flex-1 px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
-                    />
-                  ) : (
-                    <p className="dark:text-white text-gray-900">
-                      {profile.email}
-                    </p>
-                  )}
+                  <Wallet className="w-4 h-4 dark:text-gray-400 text-gray-400" />
+                  <p className="dark:text-white text-gray-900 text-sm font-mono">
+                    {address || "Not connected"}
+                  </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-                  Phone Number
+                  Total Points
                 </label>
                 <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 dark:text-gray-400 text-gray-400" />
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      value={profile.phone}
-                      onChange={(e) =>
-                        setProfile({ ...profile, phone: e.target.value })
-                      }
-                      className="flex-1 px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
-                    />
-                  ) : (
-                    <p className="dark:text-white text-gray-900">
-                      {profile.phone}
-                    </p>
-                  )}
+                  <Trophy className="w-4 h-4 text-yellow-500" />
+                  <p className="dark:text-white text-gray-900 font-semibold">
+                    {profile.total_points.toLocaleString()} OWATCH Points
+                  </p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-                  Location
+                  Member Since
                 </label>
                 <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 dark:text-gray-400 text-gray-400" />
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profile.location}
-                      onChange={(e) =>
-                        setProfile({ ...profile, location: e.target.value })
-                      }
-                      className="flex-1 px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
-                    />
-                  ) : (
-                    <p className="dark:text-white text-gray-900">
-                      {profile.location}
-                    </p>
-                  )}
+                  <Calendar className="w-4 h-4 dark:text-gray-400 text-gray-400" />
+                  <p className="dark:text-white text-gray-900">
+                    {new Date(profile.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
-                Bio
-              </label>
-              {isEditing ? (
-                <textarea
-                  rows={4}
-                  value={profile.bio}
-                  onChange={(e) =>
-                    setProfile({ ...profile, bio: e.target.value })
-                  }
-                  className="w-full px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
-                />
-              ) : (
-                <p className="dark:text-white text-gray-900">{profile.bio}</p>
-              )}
             </div>
           </div>
 
@@ -260,7 +319,7 @@ export function UserProfile() {
               Account Settings
             </h3>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
+              {/* <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
                 <div>
                   <h4 className="font-medium dark:text-white text-gray-900">
                     Two-Factor Authentication
@@ -272,7 +331,7 @@ export function UserProfile() {
                 <button className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg transition-all duration-300 text-sm">
                   Enable
                 </button>
-              </div>
+              </div> */}
 
               <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
                 <div>
@@ -285,6 +344,20 @@ export function UserProfile() {
                 </div>
                 <button className="px-4 py-2 border dark:border-gray-600 dark:hover:bg-gray-700/50 dark:text-white border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 transition-all duration-300 text-sm">
                   Change
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
+                <div>
+                  <h4 className="font-medium dark:text-white text-gray-900">
+                    Disconnect Wallet
+                  </h4>
+                  <p className="text-sm dark:text-gray-300 text-gray-600">
+                    Safely disconnect your wallet from your account
+                  </p>
+                </div>
+                <button className="px-4 py-2 border bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 text-sm">
+                  Disconnect
                 </button>
               </div>
             </div>

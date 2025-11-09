@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { ClientWalletProvider } from "@/components/ClientWalletProvider";
 import { ThemeProvider } from "@/context/ThemeContext";
 import "@/lib/supabaseErrorHandler"; // Suppress Realtime connection errors
+import "@/lib/walletConnectErrorHandler"; // Suppress WalletConnect/pino warnings
 
 // Fallback to Google-hosted fonts to avoid requiring local .woff files in the repo.
 const geistSans = Inter({ subsets: ["latin"], variable: "--font-geist-sans" });

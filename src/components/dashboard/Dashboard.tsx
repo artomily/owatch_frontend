@@ -179,7 +179,7 @@ export function Dashboard(): JSX.Element {
                     </div>
                   </div>
                   <div className="w-12 h-12 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-pink-500/20 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Icon className="w-6 h-6 dark:text-purple-400 text-purple-600" />
+                    <Icon className="w-6 h-6 dark:text-purple-600 text-purple-600" />
                   </div>
                 </div>
               </CardContent>
