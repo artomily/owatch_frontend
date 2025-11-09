@@ -16,10 +16,8 @@ import {
   Unlock,
   Clock,
   Coins,
-  Info,
   AlertCircle,
   CheckCircle,
-  ArrowUpRight,
   Zap,
 } from "lucide-react";
 
@@ -86,7 +84,7 @@ const stakingPools: StakingPool[] = [
 ];
 
 export default function StakingPage() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const [owtBalance, setOwtBalance] = useState<number>(0);
   const [userStakes, setUserStakes] = useState<UserStake[]>([]);
   const [selectedPool, setSelectedPool] = useState<StakingPool | null>(null);

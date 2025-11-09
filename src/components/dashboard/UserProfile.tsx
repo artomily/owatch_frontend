@@ -1,8 +1,5 @@
 import {
   Camera,
-  Mail,
-  Phone,
-  MapPin,
   Calendar,
   Edit,
   Save,
@@ -14,7 +11,6 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { useTheme } from "../../context/ThemeContext";
 import {
   getProfile,
   getProfileByWallet,
@@ -25,7 +21,6 @@ import {
 import { ensureProfileExists } from "@/lib/profileUtils";
 
 export function UserProfile() {
-  const { theme } = useTheme();
   const { address, isConnected } = useAccount();
 
   const [isEditing, setIsEditing] = useState(false);

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui";
 import { Play, Menu, X, Wallet } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useDisconnect } from "wagmi";
 
 interface LandingNavbarProps {
   // Reserved for future use
@@ -12,7 +11,7 @@ interface LandingNavbarProps {
 
 export function LandingNavbar({}: LandingNavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
+  const { disconnect } = useDisconnect();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -115,14 +114,29 @@ export function LandingNavbar({}: LandingNavbarProps) {
                       // }
 
                       return (
-                        <button
-                          onClick={openAccountModal}
-                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-purple-500/25 flex items-center"
-                          type="button"
-                        >
-                          <Wallet className="mr-2 h-4 w-4" />
-                          {account.displayName}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={openAccountModal}
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-purple-500/25 flex items-center"
+                            type="button"
+                          >
+                            <Wallet className="mr-2 h-4 w-4" />
+                            {account.displayName}
+                          </button>
+                          <div className="relative group">
+                            <button
+                              onClick={() => disconnect()}
+                              className="text-slate-300 hover:text-white transition-colors p-2 text-xs font-medium hover:bg-red-500/20 rounded"
+                              type="button"
+                              title="Disconnect wallet"
+                            >
+                              ×
+                            </button>
+                            <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-slate-800 text-white text-xs px-3 py-1 rounded whitespace-nowrap z-50">
+                              Disconnect
+                            </div>
+                          </div>
+                        </div>
                       );
                     })()}
                   </div>
@@ -218,14 +232,23 @@ export function LandingNavbar({}: LandingNavbarProps) {
                           // }
 
                           return (
-                            <button
-                              onClick={openAccountModal}
-                              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-purple-500/25 flex items-center justify-center"
-                              type="button"
-                            >
-                              <Wallet className="mr-2 h-4 w-4" />
-                              {account.displayName}
-                            </button>
+                            <div className="space-y-2 w-full">
+                              <button
+                                onClick={openAccountModal}
+                                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 text-sm rounded-lg font-semibold transition-all shadow-lg hover:shadow-purple-500/25 flex items-center justify-center"
+                                type="button"
+                              >
+                                <Wallet className="mr-2 h-4 w-4" />
+                                {account.displayName}
+                              </button>
+                              <button
+                                onClick={() => disconnect()}
+                                className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 px-4 py-2 text-sm rounded-lg font-semibold transition-all border border-red-500/30"
+                                type="button"
+                              >
+                                Disconnect Wallet
+                              </button>
+                            </div>
                           );
                         })()}
                       </div>

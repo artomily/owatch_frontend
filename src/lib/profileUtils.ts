@@ -36,18 +36,17 @@ export const ensureProfileExists = async (walletAddress: string) => {
       }
 
       // Create wallet entry
-      const { data: walletInsertData, error: walletInsertError } =
-        await supabase
-          .from("wallets")
-          .insert([
-            {
-              profile_id: profileData.id,
-              wallet_address: walletAddress.toLowerCase(),
-              is_primary: true,
-            },
-          ])
-          .select()
-          .single();
+      const { error: walletInsertError } = await supabase
+        .from("wallets")
+        .insert([
+          {
+            profile_id: profileData.id,
+            wallet_address: walletAddress.toLowerCase(),
+            is_primary: true,
+          },
+        ])
+        .select()
+        .single();
 
       if (walletInsertError) {
         console.error("Error creating wallet:", walletInsertError);
@@ -76,7 +75,7 @@ export const addPointsToProfile = async (
 ) => {
   try {
     // 1. Add point history
-    const { data: historyData, error: historyError } = await supabase
+    const { error: historyError } = await supabase
       .from("point_history")
       .insert([
         {
@@ -123,6 +122,76 @@ export const addPointsToProfile = async (
     return updatedProfile;
   } catch (error) {
     console.error("Error in addPointsToProfile:", error);
+    return null;
+  }
+};
+
+// Generate a valid temporary email for wallet users
+// Note: Wallet address comes from user's connected wallet (MetaMask, etc)
+// This function generates a TEMPORARY EMAIL for Supabase auth purposes only
+// The wallet address is stored separately in the wallets table
+export const generateWalletEmail = (): string => {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 10000);
+  return `wallet${timestamp}${random}@owatch.local`;
+};
+
+// Create wallet-based auth user
+// Takes WALLET ADDRESS (from connected wallet) and USERNAME (from user input)
+// Generates temporary email and password for Supabase auth
+export const createWalletAuthUser = async (
+  walletAddress: string, // 0xabc... from MetaMask/connected wallet
+  username: string // from user form input
+) => {
+  try {
+    // Generate temporary email for Supabase auth
+    const tempEmail = generateWalletEmail();
+    const tempPassword = Math.random().toString(36).slice(-15);
+
+    // Sign up with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: tempEmail,
+      password: tempPassword,
+    });
+
+    if (authError || !authData.user) {
+      console.error("Auth signup error:", authError);
+      return null;
+    }
+
+    // Create profile
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .insert({
+        id: authData.user.id,
+        email: tempEmail,
+        wallet_address: walletAddress.toLowerCase(),
+        username: username.toLowerCase(),
+        total_points: 0,
+      })
+      .select()
+      .single();
+
+    if (profileError) {
+      console.error("Profile creation error:", profileError);
+      return null;
+    }
+
+    // Link wallet to profile
+    const { error: walletError } = await supabase.from("wallets").insert({
+      profile_id: profileData.id,
+      wallet_address: walletAddress.toLowerCase(),
+      is_primary: true,
+    });
+
+    if (walletError) {
+      console.error("Wallet link error:", walletError);
+      return null;
+    }
+
+    return profileData;
+  } catch (error) {
+    console.error("Error in createWalletAuthUser:", error);
     return null;
   }
 };
