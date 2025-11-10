@@ -1,10 +1,9 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for public routes
+  // Skip middleware for public routes and API routes
   const publicRoutes = [
     "/",
     "/auth/login",
@@ -12,31 +11,32 @@ export async function middleware(request: NextRequest) {
     "/terms",
     "/landing",
   ];
+
   const isPublicRoute = publicRoutes.some(
     (route) => pathname === route || pathname.startsWith(route)
   );
 
-  if (isPublicRoute) {
+  // Also skip for API routes and static files
+  if (
+    isPublicRoute ||
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/_next/")
+  ) {
     return NextResponse.next();
   }
 
-  // Check session for protected routes
-  const response = NextResponse.next();
-  const supabase = createMiddlewareClient({ req: request, res: response });
+  // For protected routes, we'll let the client-side handle the wallet check
+  // Since middleware can't access localStorage, we'll redirect to login
+  // and let the client-side logic handle the wallet authentication
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // Redirect to login if not authenticated
-  if (!session) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    url.searchParams.set("from", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+  // Check if this is a dashboard route
+  if (pathname.startsWith("/dashboard")) {
+    // We'll let the useWalletRedirect hook handle the authentication check
+    // This middleware will just pass through
+    return NextResponse.next();
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

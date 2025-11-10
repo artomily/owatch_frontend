@@ -19,6 +19,7 @@ import {
   getProfileByWallet,
   PointHistory,
 } from "@/lib/queries";
+import { getUserData, saveUserData, type UserData } from "@/lib/walletStorage";
 
 export function Dashboard(): JSX.Element {
   const { address } = useAccount();
@@ -27,9 +28,19 @@ export function Dashboard(): JSX.Element {
   const [recentHistory, setRecentHistory] = useState<PointHistory[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // First, fetch profile ID from wallet address
+  // Get profile ID from localStorage or fetch from wallet address
   useEffect(() => {
     const getProfileId = async () => {
+      // First try to get from localStorage
+      const userData = getUserData();
+
+      // If we have saved user data and wallet address matches, use it
+      if (userData && address?.toLowerCase() === userData.walletAddress) {
+        setProfileId(userData.profileId);
+        return;
+      }
+
+      // Otherwise, fetch from Supabase using wallet address
       if (!address) {
         setProfileId(null);
         setLoading(false);
@@ -39,7 +50,17 @@ export function Dashboard(): JSX.Element {
       setLoading(true);
       try {
         const id = await getProfileByWallet(address);
-        setProfileId(id);
+        if (id) {
+          setProfileId(id);
+          // Save to localStorage for future use
+          const newUserData: UserData = {
+            walletAddress: address.toLowerCase(),
+            profileId: id,
+            totalPoints: 0,
+            lastSync: new Date().toISOString(),
+          };
+          saveUserData(newUserData);
+        }
       } catch (error) {
         console.error("Error fetching profile by wallet:", error);
         setProfileId(null);
