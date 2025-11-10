@@ -39,6 +39,7 @@ export function VideoContent(): JSX.Element {
   const [selectedVideo, setSelectedVideo] = useState<VideoWithProgress | null>(
     null
   );
+  const [watchedSeconds, setWatchedSeconds] = useState(0); // Separate state for UI updates
   const [profileId, setProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
@@ -47,7 +48,9 @@ export function VideoContent(): JSX.Element {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
 
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<any>(null);
+  const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const dbSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get profile ID from wallet (auto-create if doesn't exist)
   useEffect(() => {
@@ -92,10 +95,9 @@ export function VideoContent(): JSX.Element {
               })
             );
             setVideos(videosWithProgress);
-            setFilteredVideos(videosWithProgress);
+            // Don't set filteredVideos here - let the filter effect handle it
           } else {
             setVideos(videosData);
-            setFilteredVideos(videosData);
           }
         }
       } catch (error) {
@@ -104,12 +106,15 @@ export function VideoContent(): JSX.Element {
         setLoading(false);
       }
     };
-    fetchVideos();
+    if (profileId) {
+      fetchVideos();
+    }
   }, [profileId]);
 
-  // Filter videos
+  // Filter videos - runs after videos change or filter/search term changes
   useEffect(() => {
-    let filtered = videos;
+    let filtered = [...videos]; // Create a copy to avoid mutations
+
     if (filter !== "all") {
       filtered = filtered.filter((video) => video.category === filter);
     }
@@ -118,97 +123,202 @@ export function VideoContent(): JSX.Element {
         video.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+
     setFilteredVideos(filtered);
-  }, [filter, searchTerm, videos]);
+  }, [videos, filter, searchTerm]);
 
-  // Track video progress (real-time updates + every 10s DB sync)
+  // Load YouTube IFrame API
   useEffect(() => {
-    if (!isWatching || !selectedVideo || !profileId) return;
+    if (typeof window === "undefined") return;
 
-    const uiInterval = setInterval(() => {
-      setSelectedVideo((prev) => {
-        if (!prev) return null;
-        const newTime = (prev.watchedSeconds || 0) + 0.1;
-        const requiredDuration = prev.required_duration_seconds;
-        const completionThreshold = requiredDuration * 0.8;
+    // Check if API already loaded
+    if ((window as any).YT && (window as any).YT.Player) {
+      return;
+    }
 
-        if (
-          newTime >= completionThreshold &&
-          !prev.isCompleted &&
-          newTime <= requiredDuration
-        ) {
-          console.log(
-            `Progress: ${((newTime / requiredDuration) * 100).toFixed(
-              1
-            )}% - Ready to complete`
-          );
+    // Load YouTube IFrame API script
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // API ready callback
+    (window as any).onYouTubeIframeAPIReady = () => {
+      console.log("YouTube IFrame API ready");
+    };
+  }, []);
+
+  // Initialize YouTube Player when video selected
+  useEffect(() => {
+    if (!selectedVideo || !isWatching) {
+      // Clean up player when closing
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log("Player cleanup error:", e);
         }
-
-        return {
-          ...prev,
-          watchedSeconds: newTime,
-        };
-      });
-    }, 100);
-
-    const dbInterval = setInterval(async () => {
-      try {
-        if (!selectedVideo) return;
-
-        const currentTime = selectedVideo.watchedSeconds || 0;
-        const requiredDuration = selectedVideo.required_duration_seconds;
-        const completionThreshold = requiredDuration * 0.8;
-
-        console.log(
-          `DB Sync: ${((currentTime / requiredDuration) * 100).toFixed(1)}%`
-        );
-
-        await updateVideoProgress(
-          profileId,
-          selectedVideo.id,
-          Math.floor(currentTime)
-        );
-
-        if (currentTime >= completionThreshold && !selectedVideo.isCompleted) {
-          console.log("Completing video...");
-          const result = await completeVideo(profileId, selectedVideo.id);
-          if (result) {
-            await addPointsToProfile(
-              profileId,
-              selectedVideo.reward_points_amount,
-              selectedVideo.id,
-              "video_watch"
-            );
-
-            setEarnedPoints(selectedVideo.reward_points_amount);
-            setShowRewardModal(true);
-            setIsWatching(false);
-
-            setVideos((prev) =>
-              prev.map((v) =>
-                v.id === selectedVideo.id ? { ...v, isCompleted: true } : v
-              )
-            );
-
-            setSelectedVideo((prev) =>
-              prev ? { ...prev, isCompleted: true } : null
-            );
-
-            console.log(
-              `Video completed! Earned ${selectedVideo.reward_points_amount} points`
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Error updating progress:", error);
+        playerRef.current = null;
       }
-    }, 10000);
+      return;
+    }
+
+    // Wait for YT API to load
+    const initPlayer = () => {
+      if (!(window as any).YT || !(window as any).YT.Player) {
+        setTimeout(initPlayer, 100);
+        return;
+      }
+
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+
+      playerRef.current = new (window as any).YT.Player("youtube-player", {
+        videoId: selectedVideo.youtube_id,
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            console.log("Player ready");
+            event.target.playVideo();
+          },
+          onStateChange: (event: any) => {
+            const playerState = event.data;
+            // 1 = playing, 2 = paused
+            if (playerState === 1) {
+              startTracking();
+            } else if (playerState === 2) {
+              stopTracking();
+            }
+          },
+        },
+      });
+    };
+
+    initPlayer();
 
     return () => {
-      clearInterval(uiInterval);
-      clearInterval(dbInterval);
+      stopTracking();
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          console.log("Player cleanup error:", e);
+        }
+        playerRef.current = null;
+      }
     };
-  }, [isWatching, selectedVideo, profileId]);
+  }, [selectedVideo, isWatching]);
+
+  // Start tracking video progress
+  const startTracking = () => {
+    if (trackingIntervalRef.current) return;
+
+    console.log("Starting video tracking...");
+
+    // Update UI every 100ms with watched seconds
+    trackingIntervalRef.current = setInterval(() => {
+      if (!playerRef.current || !selectedVideo) return;
+
+      try {
+        const currentTime = playerRef.current.getCurrentTime();
+        setWatchedSeconds(currentTime); // Update UI only with time, not full video object
+
+        // Log progress every 5 seconds
+        const progress =
+          (currentTime / selectedVideo.required_duration_seconds) * 100;
+        if (Math.floor(currentTime) % 5 === 0) {
+          console.log(`Progress: ${progress.toFixed(1)}%`);
+        }
+      } catch (error) {
+        console.error("Error getting current time:", error);
+      }
+    }, 100);
+
+    // Sync to database every 10 seconds
+    if (!dbSyncIntervalRef.current) {
+      dbSyncIntervalRef.current = setInterval(async () => {
+        if (!profileId || !selectedVideo || !playerRef.current) return;
+
+        try {
+          const currentTime = playerRef.current.getCurrentTime();
+          const requiredDuration = selectedVideo.required_duration_seconds;
+          const completionThreshold = requiredDuration * 0.8;
+
+          console.log(
+            `DB Sync: ${currentTime.toFixed(1)}s / ${requiredDuration}s (${(
+              (currentTime / requiredDuration) *
+              100
+            ).toFixed(1)}%)`
+          );
+
+          // Update progress in database
+          await updateVideoProgress(
+            profileId,
+            selectedVideo.id,
+            Math.floor(currentTime)
+          );
+
+          // Check if video completed
+          if (
+            currentTime >= completionThreshold &&
+            !selectedVideo.isCompleted
+          ) {
+            console.log("Video completed! Awarding points...");
+
+            const result = await completeVideo(profileId, selectedVideo.id);
+            if (result) {
+              await addPointsToProfile(
+                profileId,
+                selectedVideo.reward_points_amount,
+                selectedVideo.id,
+                "video_watch"
+              );
+
+              setEarnedPoints(selectedVideo.reward_points_amount);
+              setShowRewardModal(true);
+              stopTracking();
+
+              setVideos((prev) =>
+                prev.map((v) =>
+                  v.id === selectedVideo.id ? { ...v, isCompleted: true } : v
+                )
+              );
+
+              setSelectedVideo((prev) =>
+                prev ? { ...prev, isCompleted: true } : null
+              );
+
+              console.log(
+                `Earned ${selectedVideo.reward_points_amount} OWATCH points!`
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error syncing progress to DB:", error);
+        }
+      }, 10000);
+    }
+  };
+
+  // Stop tracking
+  const stopTracking = () => {
+    if (trackingIntervalRef.current) {
+      clearInterval(trackingIntervalRef.current);
+      trackingIntervalRef.current = null;
+      console.log("Stopped UI tracking");
+    }
+    if (dbSyncIntervalRef.current) {
+      clearInterval(dbSyncIntervalRef.current);
+      dbSyncIntervalRef.current = null;
+      console.log("Stopped DB sync");
+    }
+  };
 
   const handlePlayVideo = (video: VideoWithProgress) => {
     setSelectedVideo(video);
@@ -216,6 +326,8 @@ export function VideoContent(): JSX.Element {
   };
 
   const handleClosePlayer = () => {
+    stopTracking();
+    setWatchedSeconds(0); // Reset watched seconds
     setSelectedVideo(null);
     setIsWatching(false);
   };
@@ -226,22 +338,18 @@ export function VideoContent(): JSX.Element {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const getYouTubeEmbedUrl = (youtubeId: string): string => {
-    return `https://www.youtube.com/embed/${youtubeId}?enablejsapi=1&origin=${
-      typeof window !== "undefined" ? window.location.origin : ""
-    }`;
-  };
-
   const getYouTubeThumbnail = (youtubeId: string): string => {
     return `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
   };
 
   const getProgressPercentage = (video: VideoWithProgress): number => {
-    if (!video.watchedSeconds || !video.required_duration_seconds) return 0;
-    return Math.min(
-      (video.watchedSeconds / video.required_duration_seconds) * 100,
-      100
-    );
+    // Use watchedSeconds from state for currently playing video, otherwise use video.watchedSeconds
+    const watched =
+      selectedVideo?.id === video.id
+        ? watchedSeconds
+        : video.watchedSeconds || 0;
+    if (!watched || !video.required_duration_seconds) return 0;
+    return Math.min((watched / video.required_duration_seconds) * 100, 100);
   };
 
   const categories = Array.from(
@@ -419,21 +527,14 @@ export function VideoContent(): JSX.Element {
               </div>
 
               <div className="relative w-full bg-black aspect-video">
-                <iframe
-                  ref={iframeRef}
-                  src={getYouTubeEmbedUrl(selectedVideo.youtube_id)}
-                  title={selectedVideo.title}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
+                {/* YouTube Player will be embedded here by YouTube IFrame API */}
+                <div id="youtube-player" className="w-full h-full" />
               </div>
 
               <div className="bg-slate-800 p-4 border-t border-slate-700">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-white font-medium">
-                    {formatDuration(selectedVideo.watchedSeconds || 0)} /{" "}
+                    {formatDuration(watchedSeconds || 0)} /{" "}
                     {formatDuration(selectedVideo.required_duration_seconds)}
                   </span>
                   <span className="text-purple-400 font-bold">

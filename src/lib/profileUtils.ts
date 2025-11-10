@@ -8,21 +8,58 @@ export const ensureProfileExists = async (walletAddress: string) => {
       .from("wallets")
       .select("profile_id")
       .eq("wallet_address", walletAddress.toLowerCase())
-      .single();
+      .maybeSingle(); // Use maybeSingle - wallet may not exist (return null, not error)
 
     if (walletData?.profile_id) {
       return walletData.profile_id;
     }
 
     // 2. If wallet doesn't exist, create profile and wallet
-    if (walletError?.code === "PGRST116") {
-      // Create a new profile
-      const username = `user_${walletAddress.substring(2, 8).toLowerCase()}`;
+    if (walletError?.code === "PGRST116" || !walletData) {
+      // Create a new profile with UUID
+      const profileId = crypto.randomUUID(); // Generate UUID for profile ID
+
+      // Generate unique username with retry logic
+      let username = `user_${walletAddress.substring(2, 8).toLowerCase()}`;
+      let attempt = 0;
+      let usernameExists = true;
+
+      while (usernameExists && attempt < 5) {
+        // Check if username already exists
+        const { data: existingUser, error: checkError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", username)
+          .maybeSingle(); // Use maybeSingle instead of single for optional results
+
+        if (checkError && checkError.code !== "PGRST116") {
+          console.error("Error checking username:", checkError);
+          return null;
+        }
+
+        if (!existingUser) {
+          usernameExists = false;
+          break;
+        }
+
+        // If exists, add random number to make unique
+        attempt++;
+        const randomNum = Math.floor(Math.random() * 10000);
+        username = `user_${walletAddress
+          .substring(2, 8)
+          .toLowerCase()}_${randomNum}`;
+      }
+
+      if (usernameExists) {
+        console.error("Could not generate unique username");
+        return null;
+      }
 
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .insert([
           {
+            id: profileId, // Add the generated ID
             username: username,
             total_points: 0,
           },
