@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useWalletRedirect } from "@/hooks/useWalletRedirect";
 import {
   Card,
@@ -19,14 +18,9 @@ import {
   Zap,
 } from "lucide-react";
 import { LandingNavbar } from "./LandingNavbar";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-interface LandingPageProps {
-  onWalletConnect?: () => void;
-}
-
-export function LandingPage({}: LandingPageProps): JSX.Element {
-  const router = useRouter();
-
+export function LandingPage(): JSX.Element {
   // This hook handles auto-redirect when wallet connects/disconnects
   useWalletRedirect();
 
@@ -121,21 +115,12 @@ export function LandingPage({}: LandingPageProps): JSX.Element {
             enjoying premium content.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0">
-            <button
-              onClick={() => router.push("/auth/login")}
-              className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold transition-all shadow-xl hover:shadow-purple-500/25 flex items-center justify-center"
-              type="button"
-            >
-              <Play className="mr-2 h-5 w-5" />
-              Start Watching
-            </button>
-            <button
-              onClick={() => router.push("/auth/signup")}
-              className="w-full sm:w-auto border-2 border-purple-500 text-purple-300 hover:bg-purple-500/10 hover:text-purple-200 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold backdrop-blur-sm transition-all duration-200 flex items-center justify-center"
-              type="button"
-            >
-              Create Account
-            </button>
+            <div className="w-full sm:w-auto">
+              <ConnectButton
+                label="Connect Wallet & Start"
+                showBalance={false}
+              />
+            </div>
             <a
               href="https://owatch-1.gitbook.io/owatch-docs"
               target="_blank"
@@ -276,21 +261,12 @@ export function LandingPage({}: LandingPageProps): JSX.Element {
                 by watching their favorite content.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <button
-                  onClick={() => router.push("/auth/login")}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-xl hover:shadow-purple-500/25 transition-all duration-300 inline-flex items-center justify-center"
-                  type="button"
-                >
-                  <Play className="mr-2 h-5 w-5 flex-shrink-0" />
-                  Start Watching Now
-                </button>
-                <button
-                  onClick={() => router.push("/auth/signup")}
-                  className="bg-slate-700 hover:bg-slate-600 text-white px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-xl hover:shadow-slate-500/25 transition-all duration-300 inline-flex items-center justify-center"
-                  type="button"
-                >
-                  Create Account
-                </button>
+                <div className="inline-flex">
+                  <ConnectButton
+                    label="Connect Wallet & Start Earning"
+                    showBalance={false}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

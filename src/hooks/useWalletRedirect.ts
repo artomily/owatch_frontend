@@ -1,25 +1,41 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
+import { isUserAuthenticated, clearUserData } from "@/lib/walletStorage";
 
 export function useWalletRedirect() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const router = useRouter();
   const pathname = usePathname();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // If connected and on landing page, redirect to dashboard
-    if (isConnected && pathname === "/") {
+    // Check if user is authenticated based on localStorage and current wallet
+    const authenticated = isConnected && isUserAuthenticated(address);
+    setIsAuthenticated(authenticated);
+
+    // If authenticated and on landing/auth pages, redirect to dashboard
+    if (authenticated && (pathname === "/" || pathname.startsWith("/auth"))) {
       router.push("/dashboard/videos");
     }
 
-    // If disconnected and on dashboard, redirect to landing
-    if (!isConnected && pathname.startsWith("/dashboard")) {
+    // If not authenticated and trying to access dashboard, redirect to home
+    if (!authenticated && pathname.startsWith("/dashboard")) {
+      // Clear any stale data
+      clearUserData();
       router.push("/");
     }
-  }, [isConnected, pathname, router]);
 
-  return { isConnected };
+    // If wallet is disconnected but we have saved address, clear localStorage
+    if (!isConnected) {
+      clearUserData();
+      if (pathname.startsWith("/dashboard")) {
+        router.push("/");
+      }
+    }
+  }, [isConnected, address, pathname, router]);
+
+  return { isConnected, isAuthenticated };
 }
