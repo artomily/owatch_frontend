@@ -1,6 +1,7 @@
 "use client";
 
 import { useWalletRedirect } from "@/hooks/useWalletRedirect";
+import { useAccount, useConnect } from "wagmi";
 import {
   Card,
   CardContent,
@@ -16,9 +17,101 @@ import {
   Users,
   Shield,
   Zap,
+  Wallet,
 } from "lucide-react";
 import { LandingNavbar } from "./LandingNavbar";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { ensureProfileExists } from "@/lib/profileUtils";
+import { saveUserData } from "@/lib/walletStorage";
+
+function WalletConnectButton(): JSX.Element {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+
+  // Create profile and save to localStorage when wallet connects
+  useEffect(() => {
+    let mounted = true;
+
+    async function setupProfile() {
+      if (isConnected && address) {
+        setIsCreatingProfile(true);
+        try {
+          const profileId = await ensureProfileExists(address);
+
+          if (mounted) {
+            // Save user data to localStorage
+            saveUserData({
+              walletAddress: address,
+              profileId: profileId,
+              totalPoints: 0,
+              lastSync: new Date().toISOString(),
+            });
+            setIsCreatingProfile(false);
+          }
+        } catch (error) {
+          console.error("Failed to create profile:", error);
+          if (mounted) {
+            setIsCreatingProfile(false);
+          }
+        }
+      } else {
+        setIsCreatingProfile(false);
+      }
+    }
+
+    setupProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isConnected, address]);
+
+  const handleConnect = async () => {
+    setIsLoading(true);
+    try {
+      const connector = connectors[0];
+      if (connector) {
+        connect({ connector });
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDashboard = () => {
+    router.push("/dashboard/videos");
+  };
+
+  if (isConnected && address) {
+    return (
+      <button
+        onClick={handleDashboard}
+        disabled={isCreatingProfile}
+        className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold backdrop-blur-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        {isCreatingProfile ? "Setting up..." : "Go to Dashboard"}
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleConnect}
+      disabled={isLoading}
+      className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-white/10"
+    >
+      <Wallet className="h-5 w-5" />
+      {isLoading ? "Connecting..." : "Connect Wallet & Start"}
+    </button>
+  );
+}
 
 export function LandingPage(): JSX.Element {
   // This hook handles auto-redirect when wallet connects/disconnects
@@ -115,12 +208,7 @@ export function LandingPage(): JSX.Element {
             enjoying premium content.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto px-4 sm:px-0">
-            <div className="w-full sm:w-auto">
-              <ConnectButton
-                label="Connect Wallet & Start"
-                showBalance={false}
-              />
-            </div>
+            <WalletConnectButton />
             <a
               href="https://owatch-1.gitbook.io/owatch-docs"
               target="_blank"
@@ -261,12 +349,7 @@ export function LandingPage(): JSX.Element {
                 by watching their favorite content.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <div className="inline-flex">
-                  <ConnectButton
-                    label="Connect Wallet & Start Earning"
-                    showBalance={false}
-                  />
-                </div>
+                <WalletConnectButton />
               </div>
             </CardContent>
           </Card>

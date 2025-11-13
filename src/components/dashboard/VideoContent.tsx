@@ -13,6 +13,7 @@ import {
   Filter,
   Search,
   X,
+  AlertCircle,
 } from "lucide-react";
 import {
   getAllRewardVideos,
@@ -47,6 +48,7 @@ export function VideoContent(): JSX.Element {
   const [isWatching, setIsWatching] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const playerRef = useRef<any>(null);
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -270,20 +272,44 @@ export function VideoContent(): JSX.Element {
             !selectedVideo.isCompleted
           ) {
             console.log("Video completed! Awarding points...");
+            stopTracking();
 
-            const result = await completeVideo(profileId, selectedVideo.id);
-            if (result) {
-              await addPointsToProfile(
+            try {
+              // Mark video as completed
+              console.log("Step 1: Completing video in database...");
+              const completeResult = await completeVideo(
+                profileId,
+                selectedVideo.id
+              );
+
+              if (!completeResult) {
+                throw new Error("Failed to mark video as completed");
+              }
+
+              console.log("Step 2: Video completion recorded successfully");
+
+              // Add points to profile
+              console.log("Step 3: Adding points to profile...");
+              const pointsResult = await addPointsToProfile(
                 profileId,
                 selectedVideo.reward_points_amount,
                 selectedVideo.id,
                 "video_watch"
               );
 
+              if (!pointsResult) {
+                throw new Error("Failed to add points to profile");
+              }
+
+              console.log(
+                `Step 4: Successfully earned ${selectedVideo.reward_points_amount} OWATCH points!`
+              );
+
+              // Update UI
               setEarnedPoints(selectedVideo.reward_points_amount);
               setShowRewardModal(true);
-              stopTracking();
 
+              // Update video list
               setVideos((prev) =>
                 prev.map((v) =>
                   v.id === selectedVideo.id ? { ...v, isCompleted: true } : v
@@ -293,10 +319,15 @@ export function VideoContent(): JSX.Element {
               setSelectedVideo((prev) =>
                 prev ? { ...prev, isCompleted: true } : null
               );
-
-              console.log(
-                `Earned ${selectedVideo.reward_points_amount} OWATCH points!`
+            } catch (error) {
+              const errorMsg =
+                error instanceof Error ? error.message : "Unknown error";
+              console.error("[VideoCompletion] Error:", errorMsg);
+              setErrorMessage(
+                `Failed to complete video: ${errorMsg}. Please refresh and try again.`
               );
+              // Reset UI
+              setTimeout(() => setErrorMessage(null), 5000);
             }
           }
         } catch (error) {
@@ -383,6 +414,22 @@ export function VideoContent(): JSX.Element {
             Watch videos and earn OWATCH points
           </p>
         </div>
+
+        {/* Error notification */}
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 text-red-700 dark:text-red-400 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         <div className="mb-8 space-y-4">
           <div className="flex gap-4 flex-col md:flex-row">

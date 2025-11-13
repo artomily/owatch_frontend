@@ -711,6 +711,10 @@ export const updateVideoProgress = async (
 // Mark video as completed
 export const completeVideo = async (profileId: string, videoId: number) => {
   try {
+    console.log(
+      `[completeVideo] Marking video ${videoId} as completed for profile ${profileId}`
+    );
+
     const { data, error } = await supabase
       .from("user_video_progress")
       .upsert([
@@ -726,14 +730,17 @@ export const completeVideo = async (profileId: string, videoId: number) => {
       .single();
 
     if (error) {
-      console.error("Error completing video:", error);
-      return null;
+      console.error("[completeVideo] Error completing video:", error);
+      throw new Error(`Failed to complete video: ${error.message}`);
     }
 
+    console.log("[completeVideo] Video marked as completed successfully");
     return data as UserVideoProgress;
   } catch (error) {
-    console.error("Error:", error);
-    return null;
+    const errorMsg =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("[completeVideo] Caught error:", errorMsg);
+    throw error;
   }
 };
 
