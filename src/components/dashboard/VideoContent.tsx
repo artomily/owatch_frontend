@@ -516,7 +516,7 @@ export function VideoContent(): JSX.Element {
                         </div>
                         <div className="flex items-center gap-1">
                           <Trophy className="w-4 h-4 text-yellow-500" />
-                          {video.reward_points_amount} pts
+                          {video.reward_points_amount} OWT
                         </div>
                       </div>
 
@@ -527,7 +527,7 @@ export function VideoContent(): JSX.Element {
                               Progress
                             </span>
                             <span className="text-purple-600 dark:text-purple-400 font-semibold">
-                              {Math.round(progressPercentage)}%
+                              {Math.floor(progressPercentage)}%
                             </span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -581,11 +581,11 @@ export function VideoContent(): JSX.Element {
               <div className="bg-slate-800 p-4 border-t border-slate-700">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-white font-medium">
-                    {formatDuration(watchedSeconds || 0)} /{" "}
+                    {formatDuration(Math.floor(watchedSeconds || 0))} /{" "}
                     {formatDuration(selectedVideo.required_duration_seconds)}
                   </span>
                   <span className="text-purple-400 font-bold">
-                    {Math.round(getProgressPercentage(selectedVideo))}%
+                    {Math.floor(getProgressPercentage(selectedVideo))}%
                   </span>
                 </div>
                 <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -599,9 +599,9 @@ export function VideoContent(): JSX.Element {
                 <p className="text-sm text-gray-400 mt-3">
                   Watch at least 80% of the video to earn{" "}
                   <span className="text-yellow-400 font-semibold">
-                    {selectedVideo.reward_points_amount}
+                    {selectedVideo.reward_points_amount} OWT
                   </span>{" "}
-                  points
+                  tokens
                 </p>
               </div>
             </div>
@@ -624,10 +624,11 @@ export function VideoContent(): JSX.Element {
               <p className="text-gray-300 mb-6">You completed the video</p>
 
               <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 border border-purple-400">
-                <p className="text-gray-300 text-sm mb-1">Points Earned</p>
+                <p className="text-gray-300 text-sm mb-1">OWT Tokens Earned</p>
                 <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">
-                  +{earnedPoints}
+                  +{earnedPoints} OWT
                 </p>
+                <p className="text-xs text-gray-400 mt-2">Automatically added to your wallet</p>
               </div>
 
               <button

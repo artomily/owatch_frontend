@@ -93,9 +93,9 @@ function WalletConnectButton(): JSX.Element {
       <button
         onClick={handleDashboard}
         disabled={isCreatingProfile}
-        className="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold backdrop-blur-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full sm:w-auto bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg rounded-xl font-semibold backdrop-blur-sm transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        <span className="w-2 h-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full animate-pulse"></span>
         {isCreatingProfile ? "Setting up..." : "Go to Dashboard"}
       </button>
     );

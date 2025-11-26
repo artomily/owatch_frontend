@@ -29,16 +29,17 @@ const navigation = [
     href: "/dashboard/videos",
     icon: Play,
   },
-  {
-    name: "Convert Points",
-    href: "/dashboard/convert",
-    icon: ArrowRightLeft,
-  },
-  {
-    name: "Staking",
-    href: "/dashboard/staking",
-    icon: Lock,
-  },
+  // Temporarily hidden
+  // {
+  //   name: "Convert Points",
+  //   href: "/dashboard/convert",
+  //   icon: ArrowRightLeft,
+  // },
+  // {
+  //   name: "Staking",
+  //   href: "/dashboard/staking",
+  //   icon: Lock,
+  // },
   {
     name: "Profile",
     href: "/dashboard/profile",
@@ -143,7 +144,7 @@ export function ResponsiveSidebar() {
                 <div className="flex items-center space-x-2">
                   <Coins className="w-4 h-4 text-yellow-500" />
                   <span className="font-semibold dark:text-white text-gray-900">
-                    0 OWATCH
+                    0 OWT
                   </span>
                 </div>
               </div>

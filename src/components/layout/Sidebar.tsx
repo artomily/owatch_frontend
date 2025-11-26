@@ -29,18 +29,19 @@ export function Sidebar(): JSX.Element {
       icon: Play,
       href: "/dashboard/videos",
     },
-    {
-      id: "convert",
-      label: "Convert Points",
-      icon: ArrowRightLeft,
-      href: "/dashboard/convert",
-    },
-    {
-      id: "staking",
-      label: "Staking",
-      icon: Lock,
-      href: "/dashboard/staking",
-    },
+    // Temporarily hidden
+    // {
+    //   id: "convert",
+    //   label: "Convert Points",
+    //   icon: ArrowRightLeft,
+    //   href: "/dashboard/convert",
+    // },
+    // {
+    //   id: "staking",
+    //   label: "Staking",
+    //   icon: Lock,
+    //   href: "/dashboard/staking",
+    // },
     { id: "profile", label: "Profile", icon: User, href: "/dashboard/profile" },
     {
       id: "settings",
@@ -79,10 +80,10 @@ export function Sidebar(): JSX.Element {
             </span>
           </div>
           <div className="text-2xl font-bold dark:text-purple-400 text-purple-600">
-            1,247
+            0
           </div>
           <div className="text-xs dark:text-slate-400 text-gray-500">
-            OWATCH tokens
+            OWT tokens
           </div>
         </div>
       </Card>
@@ -126,7 +127,7 @@ export function Sidebar(): JSX.Element {
             <div className="font-medium dark:text-white text-gray-900">
               Daily Goal
             </div>
-            <div className="mt-1">Watch 30 min to earn 50 OWATCH</div>
+            <div className="mt-1">Watch 30 min to earn 50 OWT</div>
             <div className="w-full dark:bg-slate-700 bg-gray-200 rounded-full h-2 mt-2">
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full w-3/5"></div>
             </div>

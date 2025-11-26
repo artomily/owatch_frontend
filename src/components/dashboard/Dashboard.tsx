@@ -99,8 +99,8 @@ export function Dashboard(): JSX.Element {
   const stats = [
     {
       title: "Total Earnings",
-      value: totalPoints.toLocaleString(),
-      unit: "OWATCH",
+      value: totalPoints,
+      unit: "OWT",
       change: "+12.5%",
       changeType: "positive" as const,
       icon: Coins,
@@ -118,7 +118,7 @@ export function Dashboard(): JSX.Element {
       value: recentHistory
         .filter((h) => h.source === "staking_reward")
         .reduce((sum, h) => sum + h.amount, 0),
-      unit: "OWATCH",
+      unit: "OWT",
       change: "+45min",
       changeType: "positive" as const,
       icon: Trophy,
@@ -229,7 +229,7 @@ export function Dashboard(): JSX.Element {
                   <div className="flex-1">
                     <div className="flex items-center justify-between text-xs dark:text-slate-400 text-gray-500 mb-1">
                       <span>Earnings</span>
-                      <span>{day.earnings} OWATCH</span>
+                      <span>{day.earnings} OWT</span>
                     </div>
                     <div className="w-full dark:bg-slate-700 bg-gray-200 rounded-full h-2">
                       <div
@@ -270,7 +270,7 @@ export function Dashboard(): JSX.Element {
                 </Badge>
               </div>
               <p className="text-sm dark:text-slate-300 text-gray-600 mb-2">
-                Watch 30 minutes to earn 50 OWATCH
+                Watch 30 minutes to earn 50 OWT
               </p>
               <div className="w-full dark:bg-slate-700 bg-gray-200 rounded-full h-2">
                 <div
@@ -324,7 +324,7 @@ export function Dashboard(): JSX.Element {
                   variant="secondary"
                   className="dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/30 bg-yellow-100 text-yellow-700 border-yellow-200 mt-1"
                 >
-                  +100 OWATCH Bonus
+                  +100 OWT Bonus
                 </Badge>
               </div>
             </div>
@@ -381,7 +381,7 @@ export function Dashboard(): JSX.Element {
                       {transaction.amount}
                     </div>
                     <div className="text-xs dark:text-slate-400 text-gray-500">
-                      OWATCH
+                      OWT
                     </div>
                   </div>
                 </div>
