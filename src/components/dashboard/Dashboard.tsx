@@ -337,7 +337,7 @@ export function Dashboard(): JSX.Element {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 dark:text-white text-gray-900">
             <PlayCircle className="w-5 h-5 dark:text-purple-400 text-purple-600" />
-            Recent Earnings from Supabase
+            Recent Earnings
           </CardTitle>
         </CardHeader>
         <CardContent>
