@@ -44,7 +44,7 @@ O'Watch.ID is a revolutionary Web3 platform that rewards users with OWATCH token
 - **wagmi 2.18** - React hooks for Ethereum
 - **viem 2.38** - TypeScript interface for Ethereum
 - **RainbowKit 2.2** - Beautiful wallet connection UI
-- **Base & Base Sepolia** - Layer 2 blockchain networks
+- **Mantle & Mantle Testnet** - Layer 2 blockchain networks
 
 ### Styling
 
@@ -62,7 +62,7 @@ O'Watch.ID is a revolutionary Web3 platform that rewards users with OWATCH token
 ## 📁 Project Structure
 
 ```
-owatch-base/
+owatch/
 ├── src/
 │   ├── app/                      # Next.js App Router
 │   │   ├── dashboard/           # Dashboard routes
@@ -119,8 +119,8 @@ owatch-base/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/artomily/owatch-base.git
-   cd owatch-base
+   git clone https://github.com/artomily/owatch.git
+   cd owatch
    ```
 
 2. **Install dependencies**
@@ -206,7 +206,7 @@ owatch-base/
 
 - Multi-wallet support via RainbowKit
 - Automatic connection state management
-- Network switching (Base & Base Sepolia)
+- Network switching (Mantle & Mantle Testnet)
 - Persistent wallet sessions
 - Secure authentication
 
@@ -214,8 +214,8 @@ owatch-base/
 
 ## 🌐 Supported Networks
 
-- **Base** - Layer 2 Mainnet
-- **Base Sepolia** - Layer 2 Testnet (for development)
+- **Mantle** - Layer 2 Mainnet
+- **Mantle Testnet** - Layer 2 Testnet (for development)
 
 ---
 
@@ -258,7 +258,7 @@ The wallet configuration is located in `src/lib/wagmi.ts`:
 export const config = getDefaultConfig({
   appName: "O'Watch.ID",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
-  chains: [base, baseSepolia],
+  chains: [mantle, mantleTestnet],
   ssr: true,
 });
 ```
@@ -314,7 +314,7 @@ This project is proprietary and confidential.
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Radix UI](https://www.radix-ui.com/)
 - [Lucide Icons](https://lucide.dev/)
-- [Base](https://base.org/)
+- [Mantle](https://www.mantle.xyz/)
 
 ---
 

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "Earn OWATCH tokens by watching engaging video content. Join the future of content consumption and start earning today.",
 };
 
-export default function BaseLayout({
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
