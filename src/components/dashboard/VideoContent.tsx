@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from "wagmi";
+import { parseEther } from "viem";
 import {
   Play,
   Clock,
@@ -14,6 +15,8 @@ import {
   Search,
   X,
   AlertCircle,
+  Wallet,
+  ExternalLink,
 } from "lucide-react";
 import {
   getAllRewardVideos,
@@ -25,6 +28,11 @@ import {
   type UserVideoProgress,
 } from "@/lib/queries";
 import { ensureProfileExists, addPointsToProfile } from "@/lib/profileUtils";
+import {
+  WATCH_REWARD_ADDRESS,
+  WATCH_REWARD_ABI,
+  MANTLE_TESTNET_CHAIN_ID,
+} from "@/lib/contracts";
 
 interface VideoWithProgress extends RewardVideo {
   progress?: UserVideoProgress | null;
@@ -34,6 +42,8 @@ interface VideoWithProgress extends RewardVideo {
 
 export function VideoContent(): JSX.Element {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
 
   const [videos, setVideos] = useState<VideoWithProgress[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<VideoWithProgress[]>([]);
@@ -49,10 +59,172 @@ export function VideoContent(): JSX.Element {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Claim states
+  const [claimStatus, setClaimStatus] = useState<"idle" | "pending" | "confirming" | "success" | "error">("idle");
+  const [claimTxHash, setClaimTxHash] = useState<string | null>(null);
+  const [pendingVideoCompletion, setPendingVideoCompletion] = useState<VideoWithProgress | null>(null);
 
   const playerRef = useRef<any>(null);
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const dbSyncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Wagmi hooks for contract interaction
+  const { writeContract, data: txHash, error: writeError, reset: resetWrite } = useWriteContract();
+  
+  const { isSuccess: isConfirmed, error: confirmError } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
+
+  // Watch for transaction confirmation
+  useEffect(() => {
+    if (txHash && !claimTxHash) {
+      setClaimTxHash(txHash);
+      setClaimStatus("confirming");
+      console.log("Transaction submitted:", txHash);
+    }
+  }, [txHash, claimTxHash]);
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && pendingVideoCompletion) {
+      console.log("Transaction confirmed! Processing reward...");
+      setClaimStatus("success");
+      
+      // Complete the video reward flow
+      completeVideoReward(pendingVideoCompletion);
+    }
+  }, [isConfirmed, pendingVideoCompletion]);
+
+  // Handle write errors
+  useEffect(() => {
+    if (writeError) {
+      console.error("Write contract error:", writeError);
+      setClaimStatus("error");
+      setErrorMessage(`Claim failed: ${writeError.message || "Transaction rejected"}`);
+      setPendingVideoCompletion(null);
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  }, [writeError]);
+
+  // Handle confirmation errors
+  useEffect(() => {
+    if (confirmError) {
+      console.error("Transaction confirmation error:", confirmError);
+      setClaimStatus("error");
+      setErrorMessage(`Transaction failed: ${confirmError.message || "Unknown error"}`);
+      setPendingVideoCompletion(null);
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  }, [confirmError]);
+
+  // Complete video reward after successful claim
+  const completeVideoReward = async (video: VideoWithProgress) => {
+    if (!profileId) return;
+    
+    try {
+      // Mark video as completed in database
+      console.log("Step 1: Completing video in database...");
+      const completeResult = await completeVideo(profileId, video.id);
+
+      if (!completeResult) {
+        throw new Error("Failed to mark video as completed");
+      }
+
+      console.log("Step 2: Video completion recorded successfully");
+
+      // Add points to profile
+      console.log("Step 3: Adding points to profile...");
+      const pointsResult = await addPointsToProfile(
+        profileId,
+        video.reward_points_amount,
+        video.id,
+        "video_watch"
+      );
+
+      if (!pointsResult) {
+        throw new Error("Failed to add points to profile");
+      }
+
+      console.log(`Step 4: Successfully earned ${video.reward_points_amount} OWT tokens!`);
+
+      // Update UI
+      setEarnedPoints(video.reward_points_amount);
+      setShowRewardModal(true);
+
+      // Update video list
+      setVideos((prev) =>
+        prev.map((v) =>
+          v.id === video.id ? { ...v, isCompleted: true } : v
+        )
+      );
+
+      setSelectedVideo((prev) =>
+        prev ? { ...prev, isCompleted: true } : null
+      );
+
+      // Reset states
+      setPendingVideoCompletion(null);
+      
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      console.error("[VideoCompletion] Error:", errorMsg);
+      setErrorMessage(`Failed to complete video: ${errorMsg}. Please refresh and try again.`);
+      setClaimStatus("error");
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
+
+  // Initiate claim transaction
+  const initiateClaimTransaction = async (video: VideoWithProgress) => {
+    if (!address) {
+      setErrorMessage("Wallet not connected");
+      return;
+    }
+
+    // Check if on correct network
+    if (chainId !== MANTLE_TESTNET_CHAIN_ID) {
+      console.log("Wrong network, switching to Mantle Testnet...");
+      try {
+        await switchChain({ chainId: MANTLE_TESTNET_CHAIN_ID });
+      } catch (error) {
+        setErrorMessage("Please switch to Mantle Testnet to claim rewards");
+        return;
+      }
+    }
+
+    // Reset previous transaction state
+    resetWrite();
+    setClaimTxHash(null);
+    setClaimStatus("pending");
+    setPendingVideoCompletion(video);
+
+    try {
+      console.log(`Initiating claim for ${video.reward_points_amount} OWT...`);
+      
+      // Convert points to token amount (1 point = 1 token with 18 decimals)
+      const tokenAmount = parseEther(video.reward_points_amount.toString());
+      
+      // For now, we'll use a dummy signature since the backend signing isn't implemented yet
+      // In production, you would get this signature from your backend API
+      const dummySignature = "0x" + "00".repeat(65) as `0x${string}`;
+      
+      // Call the claim function on the smart contract
+      writeContract({
+        address: WATCH_REWARD_ADDRESS,
+        abi: WATCH_REWARD_ABI,
+        functionName: "claim",
+        args: [tokenAmount, dummySignature],
+      } as any); // Type assertion needed for wagmi v2
+      
+    } catch (error) {
+      console.error("Error initiating claim:", error);
+      setClaimStatus("error");
+      setErrorMessage("Failed to initiate claim transaction");
+      setPendingVideoCompletion(null);
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
 
   // Get profile ID from wallet (auto-create if doesn't exist)
   useEffect(() => {
@@ -271,64 +443,12 @@ export function VideoContent(): JSX.Element {
             currentTime >= completionThreshold &&
             !selectedVideo.isCompleted
           ) {
-            console.log("Video completed! Awarding points...");
+            console.log("Video completed! Initiating on-chain claim...");
             stopTracking();
 
-            try {
-              // Mark video as completed
-              console.log("Step 1: Completing video in database...");
-              const completeResult = await completeVideo(
-                profileId,
-                selectedVideo.id
-              );
-
-              if (!completeResult) {
-                throw new Error("Failed to mark video as completed");
-              }
-
-              console.log("Step 2: Video completion recorded successfully");
-
-              // Add points to profile
-              console.log("Step 3: Adding points to profile...");
-              const pointsResult = await addPointsToProfile(
-                profileId,
-                selectedVideo.reward_points_amount,
-                selectedVideo.id,
-                "video_watch"
-              );
-
-              if (!pointsResult) {
-                throw new Error("Failed to add points to profile");
-              }
-
-              console.log(
-                `Step 4: Successfully earned ${selectedVideo.reward_points_amount} OWATCH points!`
-              );
-
-              // Update UI
-              setEarnedPoints(selectedVideo.reward_points_amount);
-              setShowRewardModal(true);
-
-              // Update video list
-              setVideos((prev) =>
-                prev.map((v) =>
-                  v.id === selectedVideo.id ? { ...v, isCompleted: true } : v
-                )
-              );
-
-              setSelectedVideo((prev) =>
-                prev ? { ...prev, isCompleted: true } : null
-              );
-            } catch (error) {
-              const errorMsg =
-                error instanceof Error ? error.message : "Unknown error";
-              console.error("[VideoCompletion] Error:", errorMsg);
-              setErrorMessage(
-                `Failed to complete video: ${errorMsg}. Please refresh and try again.`
-              );
-              // Reset UI
-              setTimeout(() => setErrorMessage(null), 5000);
-            }
+            // Trigger the on-chain claim transaction
+            // The reward will be processed after tx confirmation
+            initiateClaimTransaction(selectedVideo);
           }
         } catch (error) {
           console.error("Error syncing progress to DB:", error);
@@ -608,6 +728,57 @@ export function VideoContent(): JSX.Element {
           </div>
         )}
 
+        {/* Claim Transaction Modal */}
+        {(claimStatus === "pending" || claimStatus === "confirming") && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-slate-900 to-purple-900 rounded-2xl p-8 max-w-md w-full text-center border border-purple-500 shadow-2xl">
+              <div className="mb-6 flex justify-center">
+                <div className="relative">
+                  <Wallet className="w-16 h-16 text-purple-400" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="w-24 h-24 text-purple-500 animate-spin opacity-30" />
+                  </div>
+                </div>
+              </div>
+
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {claimStatus === "pending" ? "Confirm Transaction" : "Processing Claim"}
+              </h2>
+              <p className="text-gray-300 mb-6">
+                {claimStatus === "pending" 
+                  ? "Please confirm the transaction in your wallet"
+                  : "Waiting for blockchain confirmation..."
+                }
+              </p>
+
+              {claimTxHash && (
+                <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 border border-purple-400">
+                  <p className="text-gray-300 text-sm mb-2">Transaction Hash</p>
+                  <a
+                    href={`https://sepolia.mantlescan.xyz/tx/${claimTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-400 hover:text-purple-300 text-sm font-mono flex items-center justify-center gap-2"
+                  >
+                    {claimTxHash.slice(0, 10)}...{claimTxHash.slice(-8)}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              )}
+
+              <div className="flex items-center justify-center gap-2 text-gray-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">
+                  {claimStatus === "pending" 
+                    ? "Waiting for wallet confirmation..."
+                    : "Confirming on Mantle..."
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showRewardModal && (
           <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div className="bg-gradient-to-br from-purple-900 to-slate-900 rounded-2xl p-8 max-w-md w-full text-center border border-purple-500 shadow-2xl">
@@ -621,20 +792,35 @@ export function VideoContent(): JSX.Element {
               <h2 className="text-3xl font-bold text-white mb-2">
                 Congratulations!
               </h2>
-              <p className="text-gray-300 mb-6">You completed the video</p>
+              <p className="text-gray-300 mb-6">You completed the video and claimed your reward!</p>
 
               <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 border border-purple-400">
                 <p className="text-gray-300 text-sm mb-1">OWT Tokens Earned</p>
                 <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">
                   +{earnedPoints} OWT
                 </p>
-                <p className="text-xs text-gray-400 mt-2">Automatically added to your wallet</p>
+                <p className="text-xs text-gray-400 mt-2">Tokens sent to your wallet</p>
               </div>
+
+              {claimTxHash && (
+                <a
+                  href={`https://sepolia.mantlescan.xyz/tx/${claimTxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-6 text-purple-400 hover:text-purple-300 text-sm flex items-center justify-center gap-2"
+                >
+                  View transaction on Mantlescan
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
 
               <button
                 onClick={() => {
                   setShowRewardModal(false);
                   setSelectedVideo(null);
+                  setClaimStatus("idle");
+                  setClaimTxHash(null);
+                  resetWrite();
                 }}
                 className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold transition-all duration-200"
               >
