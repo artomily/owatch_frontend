@@ -8,10 +8,8 @@ import {
   ToggleLeft as Toggle,
 } from "lucide-react";
 import { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
 
 export function Settings() {
-  const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -36,22 +34,22 @@ export function Settings() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-ink mb-2">
           Settings
         </h1>
-        <p className="dark:text-gray-300 text-gray-600">
+        <p className="text-brand-ink/70">
           Manage your account settings and preferences
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Notifications */}
-        <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-purple-50 dark:bg-purple-500/20 rounded-lg">
-              <Bell className="w-5 h-5 text-purple-600" />
+            <div className="p-2 bg-brand-green/10 rounded-lg">
+              <Bell className="w-5 h-5 text-brand-green" />
             </div>
-            <h2 className="text-lg font-semibold dark:text-white text-gray-900">
+            <h2 className="text-lg font-semibold text-brand-ink">
               Notifications
             </h2>
           </div>
@@ -59,10 +57,10 @@ export function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Email Notifications
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Receive notifications via email
                 </p>
               </div>
@@ -70,8 +68,8 @@ export function Settings() {
                 onClick={() => toggleNotification("email")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   notifications.email
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -84,10 +82,10 @@ export function Settings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Push Notifications
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Receive push notifications in browser
                 </p>
               </div>
@@ -95,8 +93,8 @@ export function Settings() {
                 onClick={() => toggleNotification("push")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   notifications.push
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -109,10 +107,10 @@ export function Settings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Weekly Summary
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Get weekly activity summary
                 </p>
               </div>
@@ -120,8 +118,8 @@ export function Settings() {
                 onClick={() => toggleNotification("weekly")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   notifications.weekly
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -134,10 +132,10 @@ export function Settings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Marketing Emails
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Receive promotional content
                 </p>
               </div>
@@ -145,8 +143,8 @@ export function Settings() {
                 onClick={() => toggleNotification("marketing")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   notifications.marketing
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -160,12 +158,12 @@ export function Settings() {
         </div>
 
         {/* Privacy & Security */}
-        <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-green-50 dark:bg-green-500/20 rounded-lg">
-              <Shield className="w-5 h-5 text-green-600" />
+            <div className="p-2 bg-brand-green/10 rounded-lg">
+              <Shield className="w-5 h-5 text-brand-green" />
             </div>
-            <h2 className="text-lg font-semibold dark:text-white text-gray-900">
+            <h2 className="text-lg font-semibold text-brand-ink">
               Privacy & Security
             </h2>
           </div>
@@ -173,10 +171,10 @@ export function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Public Profile
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Make your profile visible to others
                 </p>
               </div>
@@ -184,8 +182,8 @@ export function Settings() {
                 onClick={() => togglePrivacy("profilePublic")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   privacy.profilePublic
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -198,10 +196,10 @@ export function Settings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Analytics Data
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Share usage data for improvements
                 </p>
               </div>
@@ -209,8 +207,8 @@ export function Settings() {
                 onClick={() => togglePrivacy("analyticsData")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   privacy.analyticsData
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -223,10 +221,10 @@ export function Settings() {
 
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium dark:text-white text-gray-900">
+                <h3 className="font-medium text-brand-ink">
                   Cookie Consent
                 </h3>
-                <p className="text-sm dark:text-gray-300 text-gray-600">
+                <p className="text-sm text-brand-ink/70">
                   Accept cookies for better experience
                 </p>
               </div>
@@ -234,8 +232,8 @@ export function Settings() {
                 onClick={() => togglePrivacy("cookieConsent")}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                   privacy.cookieConsent
-                    ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                    : "dark:bg-gray-600 bg-gray-200"
+                    ? "bg-brand-green"
+                    : "bg-brand-green/15"
                 }`}
               >
                 <span
@@ -249,68 +247,20 @@ export function Settings() {
         </div>
 
         {/* Appearance */}
-        <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-purple-50 dark:bg-purple-500/20 rounded-lg">
-              <Palette className="w-5 h-5 text-purple-600" />
+            <div className="p-2 bg-brand-green/10 rounded-lg">
+              <Palette className="w-5 h-5 text-brand-green" />
             </div>
-            <h2 className="text-lg font-semibold dark:text-white text-gray-900">
+            <h2 className="text-lg font-semibold text-brand-ink">
               Appearance
             </h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium dark:text-white text-gray-900 mb-3">
-                Theme
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => theme !== "light" && toggleTheme()}
-                  className={`p-3 border-2 rounded-lg transition-all duration-300 ${
-                    theme === "light"
-                      ? "border-purple-600 bg-purple-50 dark:bg-purple-500/20"
-                      : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
-                  }`}
-                >
-                  <div className="w-full h-8 bg-white rounded mb-2 shadow-sm"></div>
-                  <p
-                    className={`text-xs font-medium ${
-                      theme === "light"
-                        ? "text-purple-600"
-                        : "dark:text-gray-300 text-gray-600"
-                    }`}
-                  >
-                    Light
-                  </p>
-                </button>
-                <button
-                  onClick={() => theme !== "dark" && toggleTheme()}
-                  className={`p-3 border-2 rounded-lg transition-all duration-300 ${
-                    theme === "dark"
-                      ? "border-purple-600 bg-purple-50 dark:bg-purple-500/20"
-                      : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
-                  }`}
-                >
-                  <div className="w-full h-8 bg-gray-900 rounded mb-2"></div>
-                  <p
-                    className={`text-xs font-medium ${
-                      theme === "dark"
-                        ? "text-purple-600"
-                        : "dark:text-gray-300 text-gray-600"
-                    }`}
-                  >
-                    Dark
-                  </p>
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-medium dark:text-white text-gray-900 mb-3">
-                Language
-              </h3>
-              <select className="w-full px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300">
+              <h3 className="font-medium text-brand-ink mb-3">Language</h3>
+              <select className="w-full px-3 py-2 bg-white text-brand-ink border border-brand-green/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green transition-all duration-200">
                 <option>English (US)</option>
                 <option>English (UK)</option>
                 <option>Spanish</option>
@@ -322,38 +272,38 @@ export function Settings() {
         </div>
 
         {/* Data Management */}
-        <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="p-2 bg-orange-50 dark:bg-orange-500/20 rounded-lg">
-              <Download className="w-5 h-5 text-orange-600" />
+            <div className="p-2 bg-amber-50 rounded-lg">
+              <Download className="w-5 h-5 text-amber-600" />
             </div>
-            <h2 className="text-lg font-semibold dark:text-white text-gray-900">
+            <h2 className="text-lg font-semibold text-brand-ink">
               Data Management
             </h2>
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
-              <h3 className="font-medium dark:text-white text-gray-900 mb-2">
+            <div className="p-4 border border-brand-green/15 rounded-lg">
+              <h3 className="font-medium text-brand-ink mb-2">
                 Export Data
               </h3>
-              <p className="text-sm dark:text-gray-300 text-gray-600 mb-3">
+              <p className="text-sm text-brand-ink/70 mb-3">
                 Download a copy of your data
               </p>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all duration-300 text-sm">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-brand-green hover:bg-brand-green-700 text-brand-cream rounded-full transition-colors duration-200 text-sm">
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
             </div>
 
-            <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
-              <h3 className="font-medium text-red-900 dark:text-red-400 mb-2">
+            <div className="p-4 border border-destructive/30 rounded-lg bg-destructive/5">
+              <h3 className="font-medium text-destructive mb-2">
                 Delete Account
               </h3>
-              <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+              <p className="text-sm text-destructive/80 mb-3">
                 Permanently delete your account and all data
               </p>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300 text-sm">
+              <button className="flex items-center space-x-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors duration-200 text-sm">
                 <Trash2 className="w-4 h-4" />
                 <span>Delete Account</span>
               </button>
@@ -364,7 +314,7 @@ export function Settings() {
 
       {/* Save Changes */}
       <div className="flex justify-end">
-        <button className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all duration-300">
+        <button className="px-6 py-2.5 bg-brand-green hover:bg-brand-green-700 text-brand-cream rounded-full transition-colors duration-200">
           Save All Changes
         </button>
       </div>

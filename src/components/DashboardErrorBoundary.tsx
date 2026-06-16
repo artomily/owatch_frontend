@@ -56,7 +56,7 @@ export class DashboardErrorBoundary extends React.Component<Props, State> {
             </details>
             <button
               onClick={this.handleReset}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-lg flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-brand-green hover:bg-brand-green-700 text-brand-cream font-semibold py-2 rounded-full flex items-center justify-center gap-2 transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again

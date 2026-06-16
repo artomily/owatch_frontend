@@ -49,7 +49,7 @@ export function SidebarWalletInfo() {
         {({ openConnectModal }) => (
           <button
             onClick={openConnectModal}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg px-4 py-3 font-medium transition-all duration-300"
+            className="w-full bg-brand-green hover:bg-brand-green-700 text-brand-cream rounded-full px-4 py-3 font-medium transition-colors duration-200"
           >
             Connect Wallet
           </button>
@@ -60,12 +60,12 @@ export function SidebarWalletInfo() {
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between px-4 py-3 dark:bg-white/5 dark:backdrop-blur-md bg-white border dark:border-white/20 border-gray-200 rounded-lg">
+      <div className="flex items-center justify-between px-4 py-3 bg-white border border-brand-green/15 rounded-lg">
         <div className="flex items-center space-x-3">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-brand-green rounded-full animate-pulse"></div>
           <div>
-            <p className="text-xs dark:text-gray-400 text-gray-500">Wallet</p>
-            <p className="text-sm font-medium dark:text-white text-gray-900">
+            <p className="text-xs text-brand-ink/50">Wallet</p>
+            <p className="text-sm font-medium text-brand-ink">
               {address ? formatWalletAddress(address) : "Connected"}
             </p>
           </div>
@@ -73,9 +73,9 @@ export function SidebarWalletInfo() {
 
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-1 rounded-lg dark:hover:bg-white/10 hover:bg-gray-100 transition-colors"
+          className="p-1 rounded-lg hover:bg-brand-green/8 transition-colors"
         >
-          <MoreVertical className="w-4 h-4 dark:text-gray-400 text-gray-500" />
+          <MoreVertical className="w-4 h-4 text-brand-ink/50" />
         </button>
       </div>
 
@@ -83,19 +83,19 @@ export function SidebarWalletInfo() {
       {showMenu && (
         <div
           ref={menuRef}
-          className="absolute right-0 top-full mt-2 w-48 dark:bg-gray-800 bg-white rounded-lg border dark:border-gray-700 border-gray-200 shadow-lg z-50"
+          className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg border border-brand-green/15 shadow-lg z-50"
         >
           <div className="py-2">
             <button
               onClick={copyToClipboard}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-sm dark:text-gray-300 text-gray-700 dark:hover:bg-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-brand-ink/70 hover:bg-brand-green/8 transition-colors"
             >
               <Copy className="w-4 h-4" />
               <span>Copy Address</span>
             </button>
             <button
               onClick={handleDisconnect}
-              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:hover:bg-red-900/20 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="w-4 h-4" />
               <span>Disconnect</span>

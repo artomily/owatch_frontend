@@ -4,12 +4,26 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-geist-sans)", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        brand: {
+          green: "#7C3AED",       /* violet-600 — primary accent */
+          "green-700": "#6D28D9", /* violet-700 — hover state */
+          "green-500": "#9333EA", /* purple-600 — alternate */
+          moss: "#A78BFA",        /* violet-400 — lighter accent */
+          cream: "#F9FAFB",       /* gray-50   — light bg surfaces */
+          "cream-200": "#F3F4F6", /* gray-100  — slightly deeper bg */
+          ink: "#111827",         /* gray-900  — text */
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

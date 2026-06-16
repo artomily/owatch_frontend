@@ -11,7 +11,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isOpen, isMobile } = useSidebar();
 
   return (
-    <div className="flex h-screen dark:bg-gray-900 bg-gray-50">
+    <div className="flex h-screen bg-brand-cream">
       <ResponsiveSidebar />
 
       {/* Main Content */}

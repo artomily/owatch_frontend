@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Bricolage_Grotesque } from "next/font/google";
 import { ResponseLogger } from "@/utils/response-logger";
 import { cookies } from "next/headers";
 import { ClientWalletProvider } from "@/components/ClientWalletProvider";
@@ -13,6 +13,11 @@ const geistSans = Inter({ subsets: ["latin"], variable: "--font-geist-sans" });
 const geistMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+});
+// Editorial display typeface for large headings.
+const displayFont = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -28,12 +33,12 @@ export default function RootLayout({
   const requestId = cookies().get("x-request-id")?.value;
 
   return (
-    <html lang="en">
+    <html lang="en" className="light">
       <head>
         {requestId && <meta name="x-request-id" content={requestId} />}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased`}
       >
         <ThemeProvider>
           <ClientWalletProvider>{children}</ClientWalletProvider>

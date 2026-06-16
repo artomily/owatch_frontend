@@ -31,7 +31,7 @@ import { ensureProfileExists, addPointsToProfile } from "@/lib/profileUtils";
 import {
   WATCH_REWARD_ADDRESS,
   WATCH_REWARD_ABI,
-  MANTLE_TESTNET_CHAIN_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "@/lib/contracts";
 
 interface VideoWithProgress extends RewardVideo {
@@ -183,12 +183,12 @@ export function VideoContent(): JSX.Element {
     }
 
     // Check if on correct network
-    if (chainId !== MANTLE_TESTNET_CHAIN_ID) {
-      console.log("Wrong network, switching to Mantle Testnet...");
+    if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
+      console.log("Wrong network, switching to Base Sepolia...");
       try {
-        await switchChain({ chainId: MANTLE_TESTNET_CHAIN_ID });
+        await switchChain({ chainId: BASE_SEPOLIA_CHAIN_ID });
       } catch (error) {
-        setErrorMessage("Please switch to Mantle Testnet to claim rewards");
+        setErrorMessage("Please switch to Base Sepolia to claim rewards");
         return;
       }
     }
@@ -509,14 +509,16 @@ export function VideoContent(): JSX.Element {
 
   if (!isConnected) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-lg shadow-lg">
-          <Award className="w-16 h-16 mx-auto mb-4 text-purple-600" />
-          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center p-10 bg-white rounded-2xl border border-brand-green/12 shadow-sm">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-brand-green/10">
+            <Award className="w-8 h-8 text-brand-green" />
+          </div>
+          <h2 className="font-display text-2xl font-semibold text-brand-ink mb-2">
             Connect Your Wallet
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
-            Please connect your wallet to watch videos and earn points
+          <p className="text-brand-ink/60">
+            Please connect your wallet to watch videos and earn OWT
           </p>
         </div>
       </div>
@@ -524,27 +526,25 @@ export function VideoContent(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen dark:bg-gradient-to-br dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 bg-white p-4 md:p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold dark:text-white mb-2">
-            Watch & Earn
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-brand-ink mb-2">
+            Watch &amp; Earn
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Watch videos and earn OWATCH points
-          </p>
+          <p className="text-brand-ink/60">Watch videos and earn OWT tokens</p>
         </div>
 
         {/* Error notification */}
         {errorMessage && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 text-red-700 dark:text-red-400 rounded-lg flex items-center justify-between">
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 text-destructive rounded-lg flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{errorMessage}</span>
             </div>
             <button
               onClick={() => setErrorMessage(null)}
-              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+              className="text-destructive/70 hover:text-destructive"
             >
               <X className="w-5 h-5" />
             </button>
@@ -554,22 +554,22 @@ export function VideoContent(): JSX.Element {
         <div className="mb-8 space-y-4">
           <div className="flex gap-4 flex-col md:flex-row">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-3 w-5 h-5 text-brand-ink/40" />
               <input
                 type="text"
                 placeholder="Search videos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg dark:bg-slate-800 dark:text-white dark:border-slate-700 border border-gray-300"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white text-brand-ink placeholder:text-brand-ink/40 border border-brand-green/15 focus:outline-none focus:ring-2 focus:ring-brand-green/20"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <Filter className="w-5 h-5 text-brand-ink/50" />
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-2 rounded-lg dark:bg-slate-800 dark:text-white dark:border-slate-700 border border-gray-300"
+                className="px-4 py-2.5 rounded-full bg-white text-brand-ink border border-brand-green/15 focus:outline-none focus:ring-2 focus:ring-brand-green/20"
               >
                 <option value="all">All Categories</option>
                 {categories.map((cat) => (
@@ -584,7 +584,7 @@ export function VideoContent(): JSX.Element {
 
         {loading ? (
           <div className="flex items-center justify-center min-h-96">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-brand-green" />
           </div>
         ) : (
           <>
@@ -594,30 +594,30 @@ export function VideoContent(): JSX.Element {
                 return (
                   <div
                     key={video.id}
-                    className="group relative rounded-xl overflow-hidden dark:bg-slate-800 bg-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className="group relative rounded-xl overflow-hidden bg-white border border-brand-green/12 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
                     onClick={() => handlePlayVideo(video)}
                   >
-                    <div className="relative w-full aspect-video overflow-hidden bg-gray-200 dark:bg-slate-700">
+                    <div className="relative w-full aspect-video overflow-hidden bg-brand-green/5">
                       <img
                         src={getYouTubeThumbnail(video.youtube_id)}
                         alt={video.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
-                        <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-brand-green/0 group-hover:bg-brand-green/30 transition-all duration-300">
+                        <Play className="w-12 h-12 text-brand-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
 
                       {video.isCompleted && (
-                        <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full flex items-center gap-1 text-sm font-semibold">
+                        <div className="absolute top-2 right-2 bg-brand-green text-brand-cream px-3 py-1 rounded-full flex items-center gap-1 text-sm font-semibold">
                           <CheckCircle className="w-4 h-4" />
                           Completed
                         </div>
                       )}
 
                       {progressPercentage > 0 && !video.isCompleted && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-300 dark:bg-slate-700">
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green/10">
                           <div
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                            className="h-full bg-brand-green transition-all duration-300"
                             style={{ width: `${progressPercentage}%` }}
                           />
                         </div>
@@ -625,17 +625,17 @@ export function VideoContent(): JSX.Element {
                     </div>
 
                     <div className="p-4">
-                      <h3 className="font-semibold dark:text-white mb-2 line-clamp-2">
+                      <h3 className="font-semibold text-brand-ink mb-2 line-clamp-2">
                         {video.title}
                       </h3>
 
-                      <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      <div className="flex items-center justify-between text-sm text-brand-ink/60 mb-3">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
                           {formatDuration(video.required_duration_seconds)}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Trophy className="w-4 h-4 text-yellow-500" />
+                          <Trophy className="w-4 h-4 text-amber-500" />
                           {video.reward_points_amount} OWT
                         </div>
                       </div>
@@ -643,23 +643,21 @@ export function VideoContent(): JSX.Element {
                       {progressPercentage > 0 && !video.isCompleted && (
                         <div className="mb-3">
                           <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Progress
-                            </span>
-                            <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                            <span className="text-brand-ink/60">Progress</span>
+                            <span className="text-brand-green font-semibold">
                               {Math.floor(progressPercentage)}%
                             </span>
                           </div>
-                          <div className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div className="w-full h-2 bg-brand-green/10 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                              className="h-full bg-brand-green transition-all duration-300"
                               style={{ width: `${progressPercentage}%` }}
                             />
                           </div>
                         </div>
                       )}
 
-                      <button className="w-full py-2 px-4 rounded-lg dark:bg-purple-600 dark:hover:bg-purple-700 bg-purple-100 hover:bg-purple-200 text-purple-600 dark:text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                      <button className="w-full py-2.5 px-4 rounded-full bg-brand-green hover:bg-brand-green-700 text-brand-cream font-medium transition-colors duration-200 flex items-center justify-center gap-2">
                         <Play className="w-4 h-4" />
                         {video.isCompleted ? "Rewatch" : "Watch"}
                       </button>
@@ -671,23 +669,23 @@ export function VideoContent(): JSX.Element {
 
             {filteredVideos.length === 0 && (
               <div className="text-center py-12">
-                <Eye className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  No videos found
-                </p>
+                <Eye className="w-12 h-12 mx-auto text-brand-ink/30 mb-4" />
+                <p className="text-brand-ink/60 text-lg">No videos found</p>
               </div>
             )}
           </>
         )}
 
         {selectedVideo && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div className="bg-black rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="flex justify-between items-center p-4 bg-slate-900">
-                <h2 className="text-white font-bold">{selectedVideo.title}</h2>
+          <div className="fixed inset-0 bg-brand-ink/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-brand-green/12">
+              <div className="flex justify-between items-center p-4 bg-white border-b border-brand-green/12">
+                <h2 className="font-display font-semibold text-brand-ink">
+                  {selectedVideo.title}
+                </h2>
                 <button
                   onClick={handleClosePlayer}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-brand-ink/50 hover:text-brand-ink transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -698,27 +696,27 @@ export function VideoContent(): JSX.Element {
                 <div id="youtube-player" className="w-full h-full" />
               </div>
 
-              <div className="bg-slate-800 p-4 border-t border-slate-700">
+              <div className="bg-white p-4 border-t border-brand-green/12">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-white font-medium">
+                  <span className="text-brand-ink font-medium">
                     {formatDuration(Math.floor(watchedSeconds || 0))} /{" "}
                     {formatDuration(selectedVideo.required_duration_seconds)}
                   </span>
-                  <span className="text-purple-400 font-bold">
+                  <span className="text-brand-green font-bold">
                     {Math.floor(getProgressPercentage(selectedVideo))}%
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-brand-green/10 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                    className="h-full bg-brand-green transition-all duration-300"
                     style={{
                       width: `${getProgressPercentage(selectedVideo)}%`,
                     }}
                   />
                 </div>
-                <p className="text-sm text-gray-400 mt-3">
+                <p className="text-sm text-brand-ink/60 mt-3">
                   Watch at least 80% of the video to earn{" "}
-                  <span className="text-yellow-400 font-semibold">
+                  <span className="text-brand-green font-semibold">
                     {selectedVideo.reward_points_amount} OWT
                   </span>{" "}
                   tokens
@@ -730,35 +728,34 @@ export function VideoContent(): JSX.Element {
 
         {/* Claim Transaction Modal */}
         {(claimStatus === "pending" || claimStatus === "confirming") && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-slate-900 to-purple-900 rounded-2xl p-8 max-w-md w-full text-center border border-purple-500 shadow-2xl">
+          <div className="fixed inset-0 bg-brand-ink/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center border border-brand-green/15 shadow-2xl">
               <div className="mb-6 flex justify-center">
                 <div className="relative">
-                  <Wallet className="w-16 h-16 text-purple-400" />
+                  <Wallet className="w-16 h-16 text-brand-green" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Loader2 className="w-24 h-24 text-purple-500 animate-spin opacity-30" />
+                    <Loader2 className="w-24 h-24 text-brand-green animate-spin opacity-20" />
                   </div>
                 </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="font-display text-2xl font-semibold text-brand-ink mb-2">
                 {claimStatus === "pending" ? "Confirm Transaction" : "Processing Claim"}
               </h2>
-              <p className="text-gray-300 mb-6">
-                {claimStatus === "pending" 
+              <p className="text-brand-ink/60 mb-6">
+                {claimStatus === "pending"
                   ? "Please confirm the transaction in your wallet"
-                  : "Waiting for blockchain confirmation..."
-                }
+                  : "Waiting for blockchain confirmation..."}
               </p>
 
               {claimTxHash && (
-                <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 border border-purple-400">
-                  <p className="text-gray-300 text-sm mb-2">Transaction Hash</p>
+                <div className="bg-brand-cream rounded-lg p-4 mb-6 border border-brand-green/15">
+                  <p className="text-brand-ink/60 text-sm mb-2">Transaction Hash</p>
                   <a
-                    href={`https://sepolia.mantlescan.xyz/tx/${claimTxHash}`}
+                    href={`https://sepolia.basescan.org/tx/${claimTxHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-400 hover:text-purple-300 text-sm font-mono flex items-center justify-center gap-2"
+                    className="text-brand-green hover:text-brand-green-700 text-sm font-mono flex items-center justify-center gap-2"
                   >
                     {claimTxHash.slice(0, 10)}...{claimTxHash.slice(-8)}
                     <ExternalLink className="w-4 h-4" />
@@ -766,13 +763,12 @@ export function VideoContent(): JSX.Element {
                 </div>
               )}
 
-              <div className="flex items-center justify-center gap-2 text-gray-400">
+              <div className="flex items-center justify-center gap-2 text-brand-ink/50">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="text-sm">
-                  {claimStatus === "pending" 
+                  {claimStatus === "pending"
                     ? "Waiting for wallet confirmation..."
-                    : "Confirming on Mantle..."
-                  }
+                    : "Confirming on Base..."}
                 </span>
               </div>
             </div>
@@ -780,36 +776,40 @@ export function VideoContent(): JSX.Element {
         )}
 
         {showRewardModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-purple-900 to-slate-900 rounded-2xl p-8 max-w-md w-full text-center border border-purple-500 shadow-2xl">
+          <div className="fixed inset-0 bg-brand-ink/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-brand-green text-brand-cream rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
               <div className="mb-6 flex justify-center">
                 <div className="relative">
-                  <Trophy className="w-20 h-20 text-yellow-400 animate-bounce" />
-                  <div className="absolute inset-0 bg-yellow-400 rounded-full opacity-20 animate-pulse" />
+                  <Trophy className="w-20 h-20 text-amber-300 animate-bounce" />
+                  <div className="absolute inset-0 bg-amber-300 rounded-full opacity-20 animate-pulse" />
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold text-white mb-2">
+              <h2 className="font-display text-3xl font-semibold mb-2">
                 Congratulations!
               </h2>
-              <p className="text-gray-300 mb-6">You completed the video and claimed your reward!</p>
+              <p className="text-brand-cream/70 mb-6">
+                You completed the video and claimed your reward!
+              </p>
 
-              <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-6 border border-purple-400">
-                <p className="text-gray-300 text-sm mb-1">OWT Tokens Earned</p>
-                <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">
+              <div className="bg-brand-cream/10 rounded-lg p-4 mb-6 border border-brand-cream/20">
+                <p className="text-brand-cream/70 text-sm mb-1">OWT Tokens Earned</p>
+                <p className="font-display text-4xl font-semibold text-brand-cream">
                   +{earnedPoints} OWT
                 </p>
-                <p className="text-xs text-gray-400 mt-2">Tokens sent to your wallet</p>
+                <p className="text-xs text-brand-cream/60 mt-2">
+                  Tokens sent to your wallet
+                </p>
               </div>
 
               {claimTxHash && (
                 <a
-                  href={`https://sepolia.mantlescan.xyz/tx/${claimTxHash}`}
+                  href={`https://sepolia.basescan.org/tx/${claimTxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mb-6 text-purple-400 hover:text-purple-300 text-sm flex items-center justify-center gap-2"
+                  className="mb-6 text-brand-cream/80 hover:text-brand-cream text-sm flex items-center justify-center gap-2"
                 >
-                  View transaction on Mantlescan
+                  View transaction on BaseScan
                   <ExternalLink className="w-4 h-4" />
                 </a>
               )}
@@ -822,7 +822,7 @@ export function VideoContent(): JSX.Element {
                   setClaimTxHash(null);
                   resetWrite();
                 }}
-                className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold transition-all duration-200"
+                className="w-full py-3 px-6 rounded-full bg-brand-cream text-brand-green hover:bg-white font-semibold transition-colors duration-200"
               >
                 Continue
               </button>

@@ -110,7 +110,7 @@ export function UserProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand-green" />
       </div>
     );
   }
@@ -118,12 +118,12 @@ export function UserProfile() {
   if (!isConnected) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-lg shadow-lg">
-          <Wallet className="w-16 h-16 mx-auto mb-4 text-purple-600" />
-          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+        <div className="text-center p-8 bg-white border border-brand-green/12 rounded-2xl shadow-sm">
+          <Wallet className="w-16 h-16 mx-auto mb-4 text-brand-green" />
+          <h2 className="font-display text-2xl font-semibold mb-2 text-brand-ink">
             Connect Your Wallet
           </h2>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-brand-ink/60">
             Please connect your wallet to view your profile
           </p>
         </div>
@@ -135,10 +135,10 @@ export function UserProfile() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-ink mb-2">
             User Profile
           </h1>
-          <p className="dark:text-gray-300 text-gray-600">
+          <p className="text-brand-ink/70">
             Manage your personal information and preferences
           </p>
         </div>
@@ -147,14 +147,14 @@ export function UserProfile() {
             <>
               <button
                 onClick={handleCancel}
-                className="flex items-center space-x-2 px-4 py-2 dark:border-gray-600 dark:hover:bg-gray-700/50 dark:text-white border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 transition-all duration-300"
+                className="flex items-center space-x-2 px-4 py-2 border border-brand-green/20 rounded-full hover:bg-brand-green/5 text-brand-ink transition-colors duration-200"
               >
                 <X className="w-4 h-4" />
                 <span>Cancel</span>
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all duration-300"
+                className="flex items-center space-x-2 px-4 py-2 bg-brand-green hover:bg-brand-green-700 text-brand-cream rounded-full transition-colors duration-200"
               >
                 <Save className="w-4 h-4" />
                 <span>Save</span>
@@ -163,7 +163,7 @@ export function UserProfile() {
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all duration-300"
+              className="flex items-center space-x-2 px-4 py-2 bg-brand-green hover:bg-brand-green-700 text-brand-cream rounded-full transition-colors duration-200"
             >
               <Edit className="w-4 h-4" />
               <span>Edit Profile</span>
@@ -175,24 +175,24 @@ export function UserProfile() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Card */}
         <div className="lg:col-span-1">
-          <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
             <div className="text-center">
               <div className="relative inline-block mb-4">
-                <div className="w-24 h-24 dark:bg-gradient-to-br bg-gray-800 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                <div className="w-24 h-24 bg-brand-green rounded-full flex items-center justify-center text-brand-cream font-display text-2xl font-semibold">
                   {profile.username ? (
                     profile.username.substring(0, 2).toUpperCase()
                   ) : (
                     <User2Icon className="w-10 h-10" />
                   )}
                 </div>
-                <button className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300">
+                <button className="absolute bottom-0 right-0 w-8 h-8 bg-brand-green rounded-full flex items-center justify-center text-brand-cream hover:bg-brand-green-700 transition-colors duration-200">
                   <Camera className="w-4 h-4" />
                 </button>
               </div>
-              <h2 className="text-xl font-semibold dark:text-white text-gray-900 mb-1">
+              <h2 className="text-xl font-semibold text-brand-ink mb-1">
                 {profile.username || "Owatchers"}
               </h2>
-              <p className="dark:text-gray-300 text-gray-600 mb-2 text-sm font-mono">
+              <p className="text-brand-ink/70 mb-2 text-sm font-mono">
                 {address
                   ? `${address.substring(0, 6)}...${address.substring(
                       address.length - 4
@@ -200,12 +200,12 @@ export function UserProfile() {
                   : ""}
               </p>
               <div className="flex items-center justify-center gap-1 mb-4">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <span className="font-display text-lg font-semibold text-brand-green">
                   {profile.total_points.toLocaleString()} pts
                 </span>
               </div>
-              <div className="flex items-center justify-center text-sm dark:text-gray-400 text-gray-500">
+              <div className="flex items-center justify-center text-sm text-brand-ink/50">
                 <Calendar className="w-4 h-4 mr-1" />
                 Joined {new Date(profile.created_at).toLocaleDateString()}
               </div>
@@ -213,24 +213,24 @@ export function UserProfile() {
           </div>
 
           {/* Quick Stats */}
-          <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200 mt-6">
-            <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-4">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12 mt-6">
+            <h3 className="text-lg font-semibold text-brand-ink mb-4">
               Quick Stats
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="dark:text-gray-300 text-gray-600">
+                <span className="text-brand-ink/70">
                   Videos Completed
                 </span>
-                <span className="font-semibold dark:text-white text-gray-900">
+                <span className="font-semibold text-brand-ink">
                   {stats.videosCompleted}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="dark:text-gray-300 text-gray-600">
+                <span className="text-brand-ink/70">
                   Total Points
                 </span>
-                <span className="font-semibold dark:text-white text-gray-900">
+                <span className="font-semibold text-brand-ink">
                   {stats.totalPoints.toLocaleString()}
                 </span>
               </div>
@@ -240,14 +240,14 @@ export function UserProfile() {
 
         {/* Profile Information */}
         <div className="lg:col-span-2">
-          <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200">
-            <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12">
+            <h3 className="text-lg font-semibold text-brand-ink mb-6">
               Personal Information
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-ink/70 mb-2">
                   Username
                 </label>
                 {isEditing ? (
@@ -257,46 +257,46 @@ export function UserProfile() {
                     onChange={(e) =>
                       setProfile({ ...profile, username: e.target.value })
                     }
-                    className="w-full px-3 py-2 dark:bg-gray-700/50 dark:border-gray-600 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
+                    className="w-full px-3 py-2 bg-white text-brand-ink border border-brand-green/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green transition-all duration-200"
                   />
                 ) : (
-                  <p className="dark:text-white text-gray-900">
+                  <p className="text-brand-ink">
                     {profile.username || "Not set"}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-ink/70 mb-2">
                   Wallet Address
                 </label>
                 <div className="flex items-center space-x-2">
-                  <Wallet className="w-4 h-4 dark:text-gray-400 text-gray-400" />
-                  <p className="dark:text-white text-gray-900 text-sm font-mono">
+                  <Wallet className="w-4 h-4 text-brand-ink/40" />
+                  <p className="text-brand-ink text-sm font-mono">
                     {address || "Not connected"}
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-ink/70 mb-2">
                   Total Points
                 </label>
                 <div className="flex items-center space-x-2">
                   <Trophy className="w-4 h-4 text-yellow-500" />
-                  <p className="dark:text-white text-gray-900 font-semibold">
+                  <p className="text-brand-ink font-semibold">
                     {profile.total_points.toLocaleString()} OWATCH Points
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-brand-ink/70 mb-2">
                   Member Since
                 </label>
                 <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 dark:text-gray-400 text-gray-400" />
-                  <p className="dark:text-white text-gray-900">
+                  <Calendar className="w-4 h-4 text-brand-ink/40" />
+                  <p className="text-brand-ink">
                     {new Date(profile.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
@@ -309,17 +309,17 @@ export function UserProfile() {
           </div>
 
           {/* Account Settings */}
-          <div className="dark:bg-white/5 dark:backdrop-blur-md bg-white rounded-xl p-6 shadow-sm border dark:border-white/20 border-gray-200 mt-6">
-            <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-brand-green/12 mt-6">
+            <h3 className="text-lg font-semibold text-brand-ink mb-6">
               Account Settings
             </h3>
             <div className="space-y-4">
-              {/* <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
+              {/* <div className="flex items-center justify-between p-4 border border-brand-green/15 rounded-lg">
                 <div>
-                  <h4 className="font-medium dark:text-white text-gray-900">
+                  <h4 className="font-medium text-brand-ink">
                     Two-Factor Authentication
                   </h4>
-                  <p className="text-sm dark:text-gray-300 text-gray-600">
+                  <p className="text-sm text-brand-ink/70">
                     Add an extra layer of security to your account
                   </p>
                 </div>
@@ -328,30 +328,30 @@ export function UserProfile() {
                 </button>
               </div> */}
 
-              <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-brand-green/15 rounded-lg">
                 <div>
-                  <h4 className="font-medium dark:text-white text-gray-900">
+                  <h4 className="font-medium text-brand-ink">
                     Change Password
                   </h4>
-                  <p className="text-sm dark:text-gray-300 text-gray-600">
+                  <p className="text-sm text-brand-ink/70">
                     Update your password regularly for security
                   </p>
                 </div>
-                <button className="px-4 py-2 border dark:border-gray-600 dark:hover:bg-gray-700/50 dark:text-white border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 transition-all duration-300 text-sm">
+                <button className="px-4 py-2 border border-brand-green/20 rounded-full hover:bg-brand-green/5 text-brand-ink transition-colors duration-200 text-sm">
                   Change
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-4 border dark:border-gray-600 border-gray-200 rounded-lg">
+              <div className="flex items-center justify-between p-4 border border-brand-green/15 rounded-lg">
                 <div>
-                  <h4 className="font-medium dark:text-white text-gray-900">
+                  <h4 className="font-medium text-brand-ink">
                     Disconnect Wallet
                   </h4>
-                  <p className="text-sm dark:text-gray-300 text-gray-600">
+                  <p className="text-sm text-brand-ink/70">
                     Safely disconnect your wallet from your account
                   </p>
                 </div>
-                <button className="px-4 py-2 border bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-300 text-sm">
+                <button className="px-4 py-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full transition-colors duration-200 text-sm">
                   Disconnect
                 </button>
               </div>

@@ -1,7 +1,7 @@
 // Smart Contract ABIs and Addresses
 import { parseEther } from "viem";
 
-// Contract addresses on Mantle Testnet (Sepolia)
+// Contract addresses on Base Sepolia
 // TODO: Update these with your deployed contract addresses
 export const WATCH_REWARD_ADDRESS =
   "0x011Abb4b688AFD7E9c71130a0100E92a436d9EA4" as `0x${string}`; // WatchReward contract
@@ -128,5 +128,5 @@ export const pointsToTokenAmount = (points: number): bigint => {
   return parseEther(points.toString());
 };
 
-// Mantle Testnet Chain ID
-export const MANTLE_TESTNET_CHAIN_ID = 5003;
+// Base Sepolia Chain ID
+export const BASE_SEPOLIA_CHAIN_ID = 84532;

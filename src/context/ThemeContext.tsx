@@ -25,44 +25,17 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  // Theme is locked to the editorial light look — dark mode has been removed.
+  const [theme] = useState<Theme>("light");
 
-  // Initialize theme from localStorage or system preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem("owatch-theme") as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      // Check system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      setTheme(systemTheme);
-    }
-    setMounted(true);
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
   }, []);
 
-  // Update localStorage and document class when theme changes
-  useEffect(() => {
-    if (!mounted) return;
-
-    localStorage.setItem("owatch-theme", theme);
-
-    // Update document class for styling
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(theme);
-  }, [theme, mounted]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  // Prevent flash of incorrect theme
-  if (!mounted) {
-    return null;
-  }
+  // No-op setters keep the existing useTheme() consumers working.
+  const setTheme = (_theme: Theme) => {};
+  const toggleTheme = () => {};
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
