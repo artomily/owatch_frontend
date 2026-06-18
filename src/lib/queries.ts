@@ -302,6 +302,47 @@ export const updateProfile = async (
   }
 };
 
+// ==================== LEADERBOARD ====================
+
+export interface LeaderboardEntry {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  total_points: number;
+  rank: number;
+}
+
+// Get the top profiles ranked by total points.
+// Uses profiles.total_points (kept consistent by DB triggers) and falls back
+// gracefully so the page still renders if the column is empty.
+export const getLeaderboard = async (
+  limit = 50
+): Promise<LeaderboardEntry[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, username, avatar_url, total_points")
+      .order("total_points", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error fetching leaderboard:", error);
+      return [];
+    }
+
+    return (data || []).map((p, i) => ({
+      id: p.id,
+      username: p.username,
+      avatar_url: p.avatar_url ?? undefined,
+      total_points: p.total_points ?? 0,
+      rank: i + 1,
+    }));
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};
+
 // ==================== WALLET QUERIES ====================
 
 // Get wallets for a profile

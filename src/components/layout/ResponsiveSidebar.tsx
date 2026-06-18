@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import {
   LayoutDashboard,
   Play,
@@ -10,50 +12,78 @@ import {
   Coins,
   Menu,
   X,
-  LogOut,
-  Lock,
-  ArrowRightLeft,
+  Wallet,
+  Trophy,
+  Gift,
+  type LucideIcon,
 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { SidebarWalletInfo } from "@/components/SidebarWalletInfo";
+import { getProfileByWallet, getTotalPoints } from "@/lib/queries";
 
-const navigation = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
-    name: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    label: "Earn",
+    items: [
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { name: "Watch & Earn", href: "/dashboard/videos", icon: Play },
+    ],
   },
   {
-    name: "Videos",
-    href: "/dashboard/videos",
-    icon: Play,
-  },
-  // Temporarily hidden
-  // {
-  //   name: "Convert Points",
-  //   href: "/dashboard/convert",
-  //   icon: ArrowRightLeft,
-  // },
-  // {
-  //   name: "Staking",
-  //   href: "/dashboard/staking",
-  //   icon: Lock,
-  // },
-  {
-    name: "Profile",
-    href: "/dashboard/profile",
-    icon: User,
+    label: "Rewards",
+    items: [
+      { name: "Wallet", href: "/dashboard/wallet", icon: Wallet },
+      { name: "Leaderboard", href: "/dashboard/leaderboard", icon: Trophy },
+      { name: "Referral", href: "/dashboard/referral", icon: Gift },
+    ],
   },
   {
-    name: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
+    label: "Account",
+    items: [
+      { name: "Profile", href: "/dashboard/profile", icon: User },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings },
+    ],
   },
 ];
 
 export function ResponsiveSidebar() {
   const { isOpen, isMobile, toggleSidebar, closeSidebar } = useSidebar();
   const pathname = usePathname();
+  const { address } = useAccount();
+  const [balance, setBalance] = useState<number | null>(null);
+
+  // Live OWT balance (off-chain points total) for the sidebar footer.
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      if (!address) {
+        setBalance(null);
+        return;
+      }
+      const profileId = await getProfileByWallet(address);
+      if (!profileId) {
+        if (active) setBalance(0);
+        return;
+      }
+      const total = await getTotalPoints(profileId);
+      if (active) setBalance(total);
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, [address]);
 
   return (
     <>
@@ -101,30 +131,40 @@ export function ResponsiveSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4">
-            <ul className="space-y-2">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
+          <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6">
+            {navGroups.map((group) => (
+              <div key={group.label}>
+                <p className="px-4 mb-2 text-[11px] font-semibold uppercase tracking-wider text-brand-ink/35">
+                  {group.label}
+                </p>
+                <ul className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/dashboard" &&
+                        pathname.startsWith(item.href));
+                    const Icon = item.icon;
 
-                return (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      onClick={() => isMobile && closeSidebar()}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 group ${
-                        isActive
-                          ? "bg-brand-green text-brand-cream"
-                          : "text-brand-ink/60 hover:bg-brand-green/8 hover:text-brand-ink"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.name}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                    return (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          onClick={() => isMobile && closeSidebar()}
+                          className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors duration-200 group ${
+                            isActive
+                              ? "bg-brand-green text-brand-cream"
+                              : "text-brand-ink/60 hover:bg-brand-green/8 hover:text-brand-ink"
+                          }`}
+                        >
+                          <Icon className="w-5 h-5" />
+                          <span className="font-medium">{item.name}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
           </nav>
 
           {/* Bottom Section */}
@@ -137,10 +177,18 @@ export function ResponsiveSidebar() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Coins className="w-4 h-4 text-brand-green" />
-                  <span className="font-semibold text-brand-ink">0 OWT</span>
+                  <span className="font-semibold text-brand-ink">
+                    {balance === null
+                      ? "— OWT"
+                      : `${balance.toLocaleString()} OWT`}
+                  </span>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-brand-ink/40">≈ $0.00 USD</div>
+              <div className="mt-2 text-xs text-brand-ink/40">
+                {balance === null
+                  ? "Connect wallet to view balance"
+                  : "Earned watch-to-earn rewards"}
+              </div>
             </div>
           </div>
         </div>

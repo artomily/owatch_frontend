@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Wallet,
   ExternalLink,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getAllRewardVideos,
@@ -33,6 +34,8 @@ import {
   WATCH_REWARD_ABI,
   BASE_SEPOLIA_CHAIN_ID,
 } from "@/lib/contracts";
+import { getExplorerTxUrl, EXPLORER_NAME, NETWORK_LABEL } from "@/lib/explorer";
+import { ClaimPreviewModal } from "@/components/web3/ClaimPreviewModal";
 
 interface VideoWithProgress extends RewardVideo {
   progress?: UserVideoProgress | null;
@@ -64,6 +67,8 @@ export function VideoContent(): JSX.Element {
   const [claimStatus, setClaimStatus] = useState<"idle" | "pending" | "confirming" | "success" | "error">("idle");
   const [claimTxHash, setClaimTxHash] = useState<string | null>(null);
   const [pendingVideoCompletion, setPendingVideoCompletion] = useState<VideoWithProgress | null>(null);
+  // Video pending user review in the on-chain preview modal (web2 -> web3 transparency)
+  const [previewVideo, setPreviewVideo] = useState<VideoWithProgress | null>(null);
 
   const playerRef = useRef<any>(null);
   const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -205,8 +210,10 @@ export function VideoContent(): JSX.Element {
       // Convert points to token amount (1 point = 1 token with 18 decimals)
       const tokenAmount = parseEther(video.reward_points_amount.toString());
       
-      // For now, we'll use a dummy signature since the backend signing isn't implemented yet
-      // In production, you would get this signature from your backend API
+      // TODO(backend-signing): replace this placeholder with an EIP-712 signature
+      // fetched from the reward-signing API. Until then the claim() call carries an
+      // invalid signature (gas estimation against it would revert, which is why the
+      // preview modal does not display an estimated fee).
       const dummySignature = "0x" + "00".repeat(65) as `0x${string}`;
       
       // Call the claim function on the smart contract
@@ -441,14 +448,15 @@ export function VideoContent(): JSX.Element {
           // Check if video completed
           if (
             currentTime >= completionThreshold &&
-            !selectedVideo.isCompleted
+            !selectedVideo.isCompleted &&
+            claimStatus === "idle"
           ) {
-            console.log("Video completed! Initiating on-chain claim...");
+            console.log("Video completed! Opening on-chain claim preview...");
             stopTracking();
 
-            // Trigger the on-chain claim transaction
-            // The reward will be processed after tx confirmation
-            initiateClaimTransaction(selectedVideo);
+            // Show the transparent preview first — the user reviews exactly what
+            // moves on-chain, then confirms to trigger initiateClaimTransaction.
+            setPreviewVideo(selectedVideo);
           }
         } catch (error) {
           console.error("Error syncing progress to DB:", error);
@@ -721,9 +729,47 @@ export function VideoContent(): JSX.Element {
                   </span>{" "}
                   tokens
                 </p>
+
+                {/* Session integrity — surface the anti-abuse rules transparently */}
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-brand-green/12 pt-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-green">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Session validated
+                  </span>
+                  {[
+                    "Min watch %",
+                    "No speed manipulation",
+                    "Daily cap",
+                    "Duplicate‑claim protection",
+                  ].map((rule) => (
+                    <span
+                      key={rule}
+                      className="rounded-full bg-brand-ink/5 px-2.5 py-0.5 text-[11px] text-brand-ink/55"
+                    >
+                      {rule}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+        )}
+
+        {/* On-chain claim preview — transparent web2 -> web3 money flow before signing */}
+        {previewVideo && address && (
+          <ClaimPreviewModal
+            reward={previewVideo.reward_points_amount}
+            videoTitle={previewVideo.title}
+            userAddress={address}
+            onClose={() => {
+              setPreviewVideo(null);
+            }}
+            onConfirm={() => {
+              const video = previewVideo;
+              setPreviewVideo(null);
+              if (video) initiateClaimTransaction(video);
+            }}
+          />
         )}
 
         {/* Claim Transaction Modal */}
@@ -752,7 +798,7 @@ export function VideoContent(): JSX.Element {
                 <div className="bg-brand-cream rounded-lg p-4 mb-6 border border-brand-green/15">
                   <p className="text-brand-ink/60 text-sm mb-2">Transaction Hash</p>
                   <a
-                    href={`https://sepolia.basescan.org/tx/${claimTxHash}`}
+                    href={getExplorerTxUrl(claimTxHash)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-brand-green hover:text-brand-green-700 text-sm font-mono flex items-center justify-center gap-2"
@@ -768,7 +814,7 @@ export function VideoContent(): JSX.Element {
                 <span className="text-sm">
                   {claimStatus === "pending"
                     ? "Waiting for wallet confirmation..."
-                    : "Confirming on Base..."}
+                    : `Confirming on ${NETWORK_LABEL}...`}
                 </span>
               </div>
             </div>
@@ -804,12 +850,12 @@ export function VideoContent(): JSX.Element {
 
               {claimTxHash && (
                 <a
-                  href={`https://sepolia.basescan.org/tx/${claimTxHash}`}
+                  href={getExplorerTxUrl(claimTxHash)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mb-6 text-brand-cream/80 hover:text-brand-cream text-sm flex items-center justify-center gap-2"
                 >
-                  View transaction on BaseScan
+                  View transaction on {EXPLORER_NAME}
                   <ExternalLink className="w-4 h-4" />
                 </a>
               )}

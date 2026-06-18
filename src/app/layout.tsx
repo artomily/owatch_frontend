@@ -5,6 +5,7 @@ import { ResponseLogger } from "@/utils/response-logger";
 import { cookies } from "next/headers";
 import { ClientWalletProvider } from "@/components/ClientWalletProvider";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LenisProvider } from "@/components/providers/LenisProvider";
 import "@/lib/supabaseErrorHandler"; // Suppress Realtime connection errors
 import "@/lib/walletConnectErrorHandler"; // Suppress WalletConnect/pino warnings
 
@@ -41,7 +42,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased`}
       >
         <ThemeProvider>
-          <ClientWalletProvider>{children}</ClientWalletProvider>
+          <LenisProvider>
+            <ClientWalletProvider>{children}</ClientWalletProvider>
+          </LenisProvider>
         </ThemeProvider>
         <ResponseLogger />
       </body>

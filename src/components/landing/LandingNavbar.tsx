@@ -4,14 +4,15 @@ import { useState } from "react";
 import { Play, Menu, X, Wallet } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useDisconnect } from "wagmi";
+import { useLenis } from "@/components/providers/LenisProvider";
 
 export function LandingNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { disconnect } = useDisconnect();
+  const lenis = useLenis();
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) element.scrollIntoView({ behavior: "smooth" });
+    lenis?.scrollTo(`#${sectionId}`, { duration: 1.2, offset: -80 });
     setIsMobileMenuOpen(false);
   };
 
